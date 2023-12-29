@@ -1,4 +1,4 @@
-import type { Readable } from "svelte/store";
+import type { Writable } from "svelte/store";
 import { writable } from "svelte/store";
 
 export interface Subject {
@@ -6,16 +6,18 @@ export interface Subject {
     grade: number;
 }
 
-export interface SubjectStore extends Readable<Subject[]> {
+export interface SubjectStore extends Writable<Subject[]> {
     add: (name: string, grade: number) => void;
     remove: (subject: Subject) => void;
 }
 
 export function createSubjectList(subjects: Subject[]): SubjectStore {
-    const { subscribe, update } = writable(subjects);
+    const { subscribe, update, set } = writable(subjects);
 
     return {
         subscribe,
+        set,
+        update,
         add: (name: string, grade: number = 90) => {
             const subject = {
                 name,

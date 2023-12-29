@@ -9,18 +9,23 @@
         { name: "AP Computer Science A", grade: 100 },
         { name: "10th Lit", grade: 94 },
     ]);
-
+    
     let gpa = derived(subjects, ($subjects) => {
         let total_grade = 0;
-        $subjects.forEach((subject) => {
+        for (let subject of $subjects) {
             total_grade += subject.grade;
-        });
+        }
+
         return total_grade / $subjects.length;
     });
 
     function handleKeydown(event: KeyboardEvent) {
+        // only add a new subject if the user presses the "Enter" key
         if (event.key !== "Enter") return;
         let textBox = event.currentTarget as HTMLInputElement;
+        // if the user didn't enter anything, don't add a new subject
+        if (!textBox.value) return;
+        
         subjects.add(textBox.value, 90);
         // clear the textbox
         textBox.value = "";

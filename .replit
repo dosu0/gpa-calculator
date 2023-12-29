@@ -1,0 +1,22 @@
+
+
+modules = ["bun-1.0:v1-20230911-f253fb1"]
+
+hidden = [".config", "bun.lockb"]
+compile = "bun run build"
+run = "PROTOCOL_HEADER=x-forwarded-proto HOST_HEADER=x-forwarded-host bun build/index.js"
+
+[nix]
+channel = "stable-22_11"
+
+[deployment]
+run = ["sh", "-c", "bun dev"]
+deploymentTarget = "cloudrun"
+
+[languages]
+
+[languages.javascript]
+pattern = "**/{*.js,*.jsx,*.ts,*.tsx,*.json}"
+
+[languages.javascript.languageServer]
+start = "typescript-language-server --stdio"
