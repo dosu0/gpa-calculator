@@ -1,11 +1,13 @@
 <script lang="ts">
     import type { SubjectStore } from "./subjects";
+    import {fly} from "svelte/transition"
+    
     export let subjects: SubjectStore;
 </script>
 
 <ul>
     {#each $subjects as subject}
-        <li>
+        <li transition:fly={{ y: 200, duration: 500 }}>
             <label>
                 <span>{subject.name}</span>
                 <input type="number" min={"0"} bind:value={subject.grade} />
