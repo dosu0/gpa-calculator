@@ -6,11 +6,12 @@
 </script>
 
 <ul>
-    {#each $subjects as subject}
+    {#each $subjects as subject (subject.name)}
         <li transition:fly={{ y: 200, duration: 500 }}>
             <label>
                 <span>{subject.name}</span>
                 <input type="number" min={"0"} bind:value={subject.grade} />
+                <button on:click={() => subjects.remove(subject)}>Remove</button>
             </label>
         </li>
     {/each}
@@ -23,11 +24,18 @@
         display: flex;
     }
 
+    input {
+        max-width: 4em;
+    }
+
     span {
         flex: 1;
     }
+    ul {
+        align-items: center;
 
-    ul li {
+    }
+    li {
         position: relative;
         display: flex;
         align-items: center;

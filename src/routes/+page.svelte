@@ -11,12 +11,12 @@
     ]);
     
     let gpa = derived(subjects, ($subjects) => {
-        let total_grade = 0;
+        let totalGrade = 0;
         for (let subject of $subjects) {
-            total_grade += subject.grade;
+            totalGrade += subject.grade;
         }
 
-        return total_grade / $subjects.length;
+        return totalGrade / $subjects.length;
     });
 
     function handleKeydown(event: KeyboardEvent) {
@@ -26,7 +26,7 @@
         // if the user didn't enter anything, don't add a new subject
         if (!textBox.value) return;
         
-        subjects.add(textBox.value, 90);
+        subjects.add(textBox.value, 90); // default grade in 90
         // clear the textbox
         textBox.value = "";
     }
@@ -34,7 +34,8 @@
 
 <div class="board">
     <h1>GPA: {$gpa}</h1>
-    <input placeholder="enter a subject..." type="text" on:keydown={handleKeydown} />
+    <input placeholder="enter a subject..." type="text" 
+        on:keydown={handleKeydown} />
 
     <SubjectList {subjects} />
 </div>
@@ -43,6 +44,7 @@
     .board {
         display: grid;
         max-width: 36em;
+        align-items: center;
         margin: 0 auto;
     }
 
