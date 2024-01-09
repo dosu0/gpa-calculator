@@ -15,6 +15,7 @@
         for (let subject of $subjects) {
             totalGrade += subject.grade;
         }
+    
 
         return totalGrade / $subjects.length;
     });
@@ -33,7 +34,7 @@
 </script>
 
 <div class="board">
-    <h1>GPA: {$gpa}</h1>
+    <h1>GPA: {$gpa.toFixed(2)}</h1>
     <input placeholder="enter a subject..." type="text" 
         on:keydown={handleKeydown} />
 
