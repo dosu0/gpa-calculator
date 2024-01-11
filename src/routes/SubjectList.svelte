@@ -6,10 +6,15 @@
 </script>
 
 <ul>
-    {#each $subjects as subject (subject.name)}
+    {#each $subjects as subject (subject.id)}
         <li transition:fly={{ y: 200, duration: 500 }}>
             <label>
                 <span>{subject.name}</span>
+                {#if subject.weighted}
+                 <caption>(weighted)</caption>
+                {:else}
+                <caption>(unweighted)</caption>
+                {/if}
                 <input type="number" min={"0"} bind:value={subject.grade} />
                 <button on:click={() => subjects.remove(subject)}>Remove</button>
             </label>
@@ -31,10 +36,16 @@
     span {
         flex: 1;
     }
+    
     ul {
         align-items: center;
-
     }
+
+    caption {
+        color: lightgray;
+    }
+    
+
     li {
         position: relative;
         display: flex;

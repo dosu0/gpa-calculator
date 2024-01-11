@@ -4,18 +4,30 @@
     import { derived } from "svelte/store";
 
     let subjects = createSubjectList([
-        { name: "AP Calculus", grade: 90 },
-        { name: "Spanish 3", grade: 85 },
-        { name: "AP Computer Science A", grade: 100 },
-        { name: "10th Lit", grade: 94 },
+        { name: "AP Calculus", grade: 98, weighted: true },
+        { name: "Spanish 3", grade: 98, weighted: false },
+        { name: "AP Computer Science A", grade: 100, weighted: true },
+        { name: "10th Lit", grade: 94, weighted: false },
+        { name: "AP Lang", grade: 80, weighted: true },
     ]);
     
-    let gpa = derived(subjects, ($subjects) => {
+    let weightedGPA = derived(subjects, ($subjects) => {
         let totalGrade = 0;
         for (let subject of $subjects) {
             totalGrade += subject.grade;
         }
-    
+        return totalGrade / $subjects.length;
+    });
+
+
+    let unweightedGPA = derived(subjects, ($subjects) => {
+        let totalGrade = 0;
+        for (let subject of $subjects) {
+            totalGrade += subject.grade;
+            if (subject.weighted) {
+                totalGrade -= 7;
+            }
+        }
 
         return totalGrade / $subjects.length;
     });
@@ -34,7 +46,8 @@
 </script>
 
 <div class="board">
-    <h1>GPA: {$gpa.toFixed(2)}</h1>
+    <h2>GPA: {$weightedGPA.toFixed(2)}</h2>
+    <h2>Unweighted GPA: {$unweightedGPA.toFixed(2)}</h2>
     <input placeholder="enter a subject..." type="text" 
         on:keydown={handleKeydown} />
 
