@@ -43,18 +43,29 @@
         // clear the textbox
         textBox.value = "";
     }
+
+    function save() {
+        localStorage.setItem('subjects', JSON.stringify($subjects));
+    }
+
+    function load() {
+         const loaded = JSON.parse(localStorage.getItem('subjects'));
+        console.log(loaded);
+        subjects.set(loaded);
+    }
 </script>
 
 <div class="board">
+    <!-- round GPAs to two decimal places -->
     <h2>GPA: {$weightedGPA.toFixed(2)}</h2>
     <h2>Unweighted GPA: {$unweightedGPA.toFixed(2)}</h2>
-    <input placeholder="enter a subject..." type="text" 
-        on:keydown={handleKeydown} />
+    <input placeholder="enter a subject..." type="text" on:keydown={handleKeydown} />
 
     <SubjectList {subjects} />
 
     <button>import grades from infinite campus</button>
-    <button>save</button>
+    <button on:click={save}>save</button>
+    <button on:click={load}>load</button>
 </div>
 
 <style>
