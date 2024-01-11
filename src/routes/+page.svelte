@@ -52,6 +52,9 @@
         on:keydown={handleKeydown} />
 
     <SubjectList {subjects} />
+
+    <button>import grades from infinite campus</button>
+    <button>save</button>
 </div>
 
 <style>

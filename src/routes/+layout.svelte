@@ -4,11 +4,11 @@
 <nav>
     <a href="/">home</a>
     <a href="/about">about</a>
-    <button>import grades from infinite campus</button>
+     <a href="/help">help</a>
+
 </nav>
 
 <h1>GPA Calculator</h1>
-
 
 <slot />
 
@@ -16,7 +16,6 @@
         
 </div>
 </div>
-
 
 
 <style>
