@@ -1,13 +1,17 @@
 <script lang="ts">
     import type { SubjectStore } from "./subjects";
-    import {fly} from "svelte/transition"
+    import {slide} from "svelte/transition"
     
     export let subjects: SubjectStore;
+
+    
 </script>
 
+
 <ul>
+    <!--  TODO: add weighted/unweighted switch -->
     {#each $subjects as subject (subject.id)}
-        <li transition:fly={{ y: 200, duration: 500 }}>
+        <li transition:slide|global>
             <label>
                 <span>{subject.name}</span>
                 {#if subject.weighted}
