@@ -6,10 +6,15 @@ run = "npm run dev -- --host"
 [nix]
 channel = "stable-22_11"
 
-[deployment]
-build = "bun build"
-run = ["bun build/index.js"]
-deploymentTarget = "cloudrun"
+
+[packager]
+language = "nodejs"
+
+[packager.features]
+packageSearch = true
+guessImports = true
+enabledForHosting = false
+
 
 [languages]
 
@@ -23,4 +28,9 @@ start = "typescript-language-server --stdio"
 pattern = "**/{*.svelte}"
 
 [languages.svelte.languageServer]
-start = "svelte-language-server --stdio"
+start = "svelteserver --stdio"
+
+[deployment]
+build = "bun build"
+run = ["bun build/index.js"]
+deploymentTarget = "cloudrun"
