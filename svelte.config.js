@@ -8,6 +8,9 @@ const config = {
     preprocess: vitePreprocess(),
 
     kit: {
+        alias: {
+            $components: "./src/components",
+        },
         // See https://kit.svelte.dev/docs/adapters for more information about adapters.
         adapter: adapter(),
     },
