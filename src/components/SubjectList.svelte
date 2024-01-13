@@ -1,3 +1,5 @@
+<!-- This component contains the list of subjects -->
+
 <script lang="ts">
     import type { SubjectStore } from "./subjects";
     import {slide} from "svelte/transition"
@@ -43,6 +45,7 @@
     
     ul {
         align-items: center;
+        list-style-type: none;
     }
 
     caption {
@@ -56,6 +59,7 @@
         align-items: center;
         padding: 0.5em 0.5em 0.5em 1em;
         margin: 0 0 0.5em 0;
+
         gap: 0.5em;
         border-radius: 5px;
         user-select: none;

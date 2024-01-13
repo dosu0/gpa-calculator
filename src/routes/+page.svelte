@@ -1,6 +1,8 @@
+<!-- This is the home page -->
+
 <script lang="ts">
     import { createSubjectList } from "./subjects";
-    import SubjectList from "./SubjectList.svelte";
+    import SubjectList from "$components/SubjectList.svelte";
     import { derived } from "svelte/store";
 
     let subjects = createSubjectList([
@@ -10,6 +12,8 @@
         { name: "10th Lit", grade: 94, weighted: false },
         { name: "AP Lang", grade: 80, weighted: true },
     ]);
+
+    // whenever the subject list changes we compute the weighted and unweighted GPAs
     
     let weightedGPA = derived(subjects, ($subjects) => {
         let totalGrade = 0;
@@ -45,14 +49,16 @@
     }
 
     function save() {
+        // save the subjects to local storage
+        // TODO: we might have to save them to a database too
         localStorage.setItem('subjects', JSON.stringify($subjects));
     }
 
     function load() {
          const loaded = JSON.parse(localStorage.getItem('subjects'));
-        console.log(loaded);
         subjects.set(loaded);
     }
+
 </script>
 
 <div class="board">
@@ -81,4 +87,5 @@
         padding: 0.5em;
         margin: 0 0 1rem 0;
     }
+
 </style>
