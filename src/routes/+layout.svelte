@@ -4,12 +4,13 @@
 <nav>
     <a href="/">home</a>
     <a href="/about">about</a>
-     <a href="/help">help</a>
+    <a href="/help">help</a>
 
 </nav>
 
 <h1>GPA Calculator</h1>
 
+<!-- The slot tag is where the rest of the page is inserted -->
 <slot />
 
 <footer>By Samuel and Robbie 2023-2024</footer>
@@ -19,19 +20,22 @@
 
 
 <style>
-    #page-container {
+    
+    .page-container {
         position: relative;
         min-height: 100vh;
     }
 
-    #wrap-content {
+    /* Set the the size of the footer */
+    .wrap-content {
         padding-bottom: 3.5rem;
     }
-    
+
+    /* place the footer at the bottom of the page */
     footer {
         position: absolute;
         bottom: 0;
         width: 100%;
-        height: 2.5rem;
+        height: 3.5rem;
     }
 </style>
