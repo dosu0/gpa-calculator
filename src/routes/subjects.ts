@@ -1,6 +1,7 @@
 import type { Writable } from "svelte/store";
 import { writable } from "svelte/store";
 
+
 export interface Subject {
     id: number;
     weighted: boolean;
@@ -8,6 +9,7 @@ export interface Subject {
     grade: number;
 }
 
+// This extends the functionality of the writable store provided by svelte so we can use it to add and remove subjects
 export interface SubjectStore extends Writable<Subject[]> {
     add: (name: string, grade: number) => void;
     remove: (subject: Subject) => void;
