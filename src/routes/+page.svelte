@@ -57,13 +57,11 @@
         subjects.add(textBox.value, 90); // default grade in 90
         // clear the textbox
         textBox.value = "";
-    }
-
-    function save() {
         // save the subjects to local storage
         // TODO: we might have to save them to a database too
         localStorage.setItem('subjects', JSON.stringify($subjects));
     }
+
 
     function load() {
         const loaded = JSON.parse(localStorage.getItem('subjects'));
@@ -75,7 +73,7 @@
     }
     
     let showImportDialog = false;
-
+    
     onMount(load);
 </script>
 
@@ -90,8 +88,6 @@
     <button on:click={() => showImportDialog = true}>
         import grades from infinite campus
     </button>
-    <button on:click={save}>save</button>
-    <button on:click={load}>load</button>
     <button on:click={() => subjects.clear()}>clear</button>
 </div>
 
