@@ -2,7 +2,7 @@
 
 This app uses [svelte](https://svelte.dev) with typescript
 
-Svelte makes it easier for our code to update stuff in the HTML
+Svelte makes it easier for our code to update stuff in the HTML.
 
 ## Developing
 

@@ -2,13 +2,13 @@
 <div class="wrap-content">
     
 <nav>
+    <h1>GPA Calculator</h1>
+
     <a href="/">home</a>
     <a href="/about">about</a>
     <a href="/help">help</a>
 
 </nav>
-
-<h1>GPA Calculator</h1>
 
 <!-- The slot tag is where the rest of the page is inserted -->
 <slot />

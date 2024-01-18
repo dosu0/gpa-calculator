@@ -13,9 +13,10 @@ export interface Subject {
 export interface SubjectStore extends Writable<Subject[]> {
     add: (name: string, grade: number) => void;
     remove: (subject: Subject) => void;
+    clear: () => void;
 }
 
-export function createSubjectList(initialSubjects: Subject[]): SubjectStore {
+export function createSubjectList(initialSubjects: Omit<Subject, "id">[]): SubjectStore {
     let id = 0;
 
     const subjects = initialSubjects.map((subject) => ({
@@ -42,5 +43,8 @@ export function createSubjectList(initialSubjects: Subject[]): SubjectStore {
         remove: (subject: Subject) => {
             update(($subjects) => $subjects.filter((s) => s !== subject));
         },
+        clear: () => {
+            update(() => []);
+        }
     };
 }

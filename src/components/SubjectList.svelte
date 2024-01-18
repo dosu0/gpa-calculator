@@ -2,7 +2,7 @@
 
 <script lang="ts">
     import type { SubjectStore } from "./subjects";
-    import {slide} from "svelte/transition"
+    import {slide} from "svelte/transition";
     
     export let subjects: SubjectStore;
 

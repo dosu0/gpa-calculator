@@ -3,8 +3,11 @@
 <script lang="ts">
     import { createSubjectList } from "./subjects";
     import SubjectList from "$components/SubjectList.svelte";
+    import Modal from "$components/Modal.svelte";
     import { derived } from "svelte/store";
+    import { onMount } from "svelte";
 
+    
     let subjects = createSubjectList([
         { name: "AP Calculus", grade: 98, weighted: true },
         { name: "Spanish 3", grade: 98, weighted: false },
@@ -12,19 +15,27 @@
         { name: "10th Lit", grade: 94, weighted: false },
         { name: "AP Lang", grade: 80, weighted: true },
     ]);
-
+    
     // whenever the subject list changes we compute the weighted and unweighted GPAs
     
     let weightedGPA = derived(subjects, ($subjects) => {
+        if ($subjects.length === 0)
+            return 0;
+    
         let totalGrade = 0;
         for (let subject of $subjects) {
             totalGrade += subject.grade;
         }
+
         return totalGrade / $subjects.length;
     });
 
 
     let unweightedGPA = derived(subjects, ($subjects) => {
+        if ($subjects.length === 0)
+            return 0;
+
+        
         let totalGrade = 0;
         for (let subject of $subjects) {
             totalGrade += subject.grade;
@@ -55,10 +66,17 @@
     }
 
     function load() {
-         const loaded = JSON.parse(localStorage.getItem('subjects'));
-        subjects.set(loaded);
-    }
+        const loaded = JSON.parse(localStorage.getItem('subjects'));
 
+        if (loaded) {
+            subjects.set(loaded);
+        }
+
+    }
+    
+    let showImportDialog = false;
+
+    onMount(load);
 </script>
 
 <div class="board">
@@ -69,10 +87,18 @@
 
     <SubjectList {subjects} />
 
-    <button>import grades from infinite campus</button>
+    <button on:click={() => showImportDialog = true}>
+        import grades from infinite campus
+    </button>
     <button on:click={save}>save</button>
     <button on:click={load}>load</button>
+    <button on:click={() => subjects.clear()}>clear</button>
 </div>
+
+<Modal bind:show={showImportDialog} >
+    <h2 slot="title">Import grades from infinite campus</h2>
+    <p>This feature is not yet implemented.</p>
+</Modal>
 
 <style>
     .board {

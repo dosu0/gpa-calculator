@@ -1,0 +1,3 @@
+- Document libraries used (in the about page?)
+- Add an interactive help menu
+- 
