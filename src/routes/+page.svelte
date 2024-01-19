@@ -56,7 +56,7 @@
         subjects.add(textBox.value, 90); // default grade in 90
         // clear the textbox
         textBox.value = "";
-        console.log($subjects);
+        save();
     }
 
     function save() {
@@ -71,7 +71,6 @@
         if (loaded) {
             subjects = createSubjectList(loaded);
         }
-
     }
     
     let showImportDialog = false;
