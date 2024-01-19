@@ -1,7 +1,5 @@
 { pkgs }: {
   deps = [
-      pkgs.unzip
-      pkgs.bun
       pkgs.nodePackages.svelte-language-server
       
   ];

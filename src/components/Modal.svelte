@@ -8,7 +8,7 @@
 </script>
 
 <dialog 
-    bind:this={dialog}  
+    bind:this={dialog}
     on:close={() => show=false}
     >
     <slot name="title" />

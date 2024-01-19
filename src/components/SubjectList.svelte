@@ -18,8 +18,6 @@
                 <span>{subject.name}</span>
                 {#if subject.weighted}
                  <caption>(weighted)</caption>
-                {:else}
-                <caption>(unweighted)</caption>
                 {/if}
                 <input type="number" min={"0"} bind:value={subject.grade} />
                 <button on:click={() => subjects.remove(subject)}>Remove</button>
@@ -46,12 +44,13 @@
     ul {
         align-items: center;
         list-style-type: none;
+        margin: 0 0 1em 0;
+
     }
 
     caption {
         color: lightgray;
     }
-    
 
     li {
         position: relative;
@@ -59,10 +58,7 @@
         align-items: center;
         padding: 0.5em 0.5em 0.5em 1em;
         margin: 0 0 0.5em 0;
-
-        gap: 0.5em;
         border-radius: 5px;
-        user-select: none;
         background: green;
         filter: drop-shadow(2px 3px 6px rgba(0, 0, 0, 0.1));
     }

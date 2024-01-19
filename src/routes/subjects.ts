@@ -1,10 +1,14 @@
 import type { Writable } from "svelte/store";
 import { writable } from "svelte/store";
 
-
 export interface Subject {
     id: number;
     weighted: boolean;
+    name: string;
+    grade: number;
+}
+
+export interface InitialSubject {
     name: string;
     grade: number;
 }
@@ -16,11 +20,16 @@ export interface SubjectStore extends Writable<Subject[]> {
     clear: () => void;
 }
 
-export function createSubjectList(initialSubjects: Omit<Subject, "id">[]): SubjectStore {
+function isWeighted(name: string): boolean {
+    let advancedIndicators = new RegExp(/advanced|ap|honors/i);
+    return advancedIndicators.test(name) || name.endsWith(" H") || name.endsWith(" h");
+}
+export function createSubjectList(initialSubjects: InitialSubject[]): SubjectStore {
     let id = 0;
 
     const subjects = initialSubjects.map((subject) => ({
         ...subject,
+        weighted: isWeighted(subject.name),
         id: id++,
     }));
 
@@ -30,12 +39,12 @@ export function createSubjectList(initialSubjects: Omit<Subject, "id">[]): Subje
         subscribe,
         set,
         update,
-        add: (name: string, grade: number = 90, weighted: boolean = false) => {
+        add: (name: string, grade: number = 90) => {
             const subject = {
                 id: id++,
                 name,
                 grade,
-                weighted
+                weighted: isWeighted(name),
             };
             console.log(subjects);
             update(($subjects) => [...$subjects, subject]);
@@ -45,6 +54,6 @@ export function createSubjectList(initialSubjects: Omit<Subject, "id">[]): Subje
         },
         clear: () => {
             update(() => []);
-        }
+        },
     };
 }
