@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 32 32"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="layer1">
+    <rect
+       style="fill:#2ec27e;stroke-width:11.5806;stroke-linecap:round;stroke-linejoin:round"
+       id="rect28"
+       width="32"
+       height="32"
+       x="0"
+       y="0"
+       rx="4.154542"
+       ry="4.154542" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24.5334px;font-family:'CaskaydiaCove Nerd Font Mono';-inkscape-font-specification:'CaskaydiaCove Nerd Font Mono, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:13.46;stroke-linecap:round;stroke-linejoin:round"
+       x="1.954389"
+       y="24.505232"
+       id="text28"><tspan
+         id="tspan28"
+         x="1.954389"
+         y="24.505232"
+         style="stroke-width:13.46">A+</tspan></text>
+  </g>
+</svg>
