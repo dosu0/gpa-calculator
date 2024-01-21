@@ -6,7 +6,10 @@
     import Modal from "$components/Modal.svelte";
     import { derived } from "svelte/store";
     import { onMount } from "svelte";
+    import StateSelect from "$components/StateSelect.svelte";
 
+    
+    export let data;
     
     let subjects = createSubjectList([
         { name: "AP Calculus", grade: 98 },
@@ -96,8 +99,12 @@
 
 <Modal bind:show={showImportDialog} >
     <h2 slot="title">Import grades from infinite campus</h2>
-    <p>work in progress</p>
-    <input type="text" placeholder="enter your school district" />
+    <span>select a county:</span>
+    <select>
+        {#each data.districts as district (district.id)}
+            <option>{district.district_name}</option>
+        {/each}
+    </select>
 </Modal>
 
 <style>
