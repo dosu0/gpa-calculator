@@ -6,8 +6,6 @@
     import Modal from "$components/Modal.svelte";
     import { derived } from "svelte/store";
     import { onMount } from "svelte";
-    import StateSelect from "$components/StateSelect.svelte";
-
     
     export let data;
     
