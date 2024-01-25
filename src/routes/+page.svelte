@@ -78,8 +78,10 @@
     let county: string;
 
     function gradeColor(grade: number): string {
-        if (grade >= 80) {
+        if (grade >= 90) {
             return "green";
+        } else if (grade >= 80) {
+            return "yellowgreen";
         } else if (grade >= 70) {
             return "orange";
         } else {
