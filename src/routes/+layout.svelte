@@ -1,26 +1,30 @@
-<div class="page-container">  
-<div class="wrap-content">
-    
-<nav>
-    <h1>GPA Calculator</h1>
+<div class="page-container">
+    <div class="wrap-content">
+        <h1>GPA Calculator</h1>
+        <nav>
+            <a href="/">home</a>
+            <a href="/about">about</a>
+            <a href="/help">help</a>
+        </nav>
 
-    <a href="/">home</a>
-    <a href="/about">about</a>
-    <a href="/help">help</a>
+        <!-- The slot tag is where the rest of the page is inserted -->
+        <slot />
 
-</nav>
-
-<!-- The slot tag is where the rest of the page is inserted -->
-<slot />
-
-<footer>By Samuel and Robbie 2023-2024</footer>
-        
+        <footer>By Samuel and Robbie 2023-2024</footer>
+    </div>
 </div>
-</div>
-
 
 <style>
-    
+    h1 {
+        font-size: 48px;
+        line-height: 120%;
+        text-align: center;
+    }
+
+    nav {
+        text-align: center;
+    }
+
     .page-container {
         position: relative;
         min-height: 100vh;
@@ -39,3 +43,4 @@
         height: 3.5rem;
     }
 </style>
+

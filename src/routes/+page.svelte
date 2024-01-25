@@ -1,5 +1,3 @@
-<!-- This is the home page -->
-
 <script lang="ts">
     import { createSubjectList } from "./subjects";
     import SubjectList from "$components/SubjectList.svelte";
@@ -65,7 +63,7 @@
     }
 
     function load() {
-        const loaded = JSON.parse(localStorage.getItem("subjects"));
+        const loaded = JSON.parse(localStorage.getItem("subjects") || "{}");
 
         if (loaded) {
             subjects = createSubjectList(loaded);
@@ -73,19 +71,40 @@
     }
 
     function getDistrict(name: string): District {
-        return data.districts.filter((d: District) => d.district_name == county)[0];
+        return data.districts.filter((d: District) => d.district_name == name)[0];
     }
 
     let showImportDialog = false;
     let county: string;
+
+    function gradeColor(grade: number): string {
+        if (grade >= 80) {
+            return "green";
+        } else if (grade >= 70) {
+            return "orange";
+        } else {
+            return "red";
+        }
+    }
 
     onMount(load);
 </script>
 
 <div class="board">
     <!-- round GPAs to two decimal places -->
-    <h2>GPA: {$weightedGPA.toFixed(2)}</h2>
-    <h2>Unweighted GPA: {$unweightedGPA.toFixed(2)}</h2>
+    <h2>
+        GPA:
+        <span style="color: {gradeColor($weightedGPA)}">
+            {$weightedGPA.toFixed(2)}
+        </span>
+    </h2>
+    <h2>
+        Unweighted GPA:
+        <span style="color: {gradeColor($unweightedGPA)}">
+            {$unweightedGPA.toFixed(2)}
+        </span>
+    </h2>
+
     <input placeholder="enter a subject..." type="text" on:keydown={handleKeydown} />
 
     <SubjectList {subjects} />
@@ -122,6 +141,10 @@
         font-size: 1.4em;
         padding: 0.5em;
         margin: 0 0 1rem 0rem;
+    }
+
+    span {
+        color: green;
     }
 
     .board > button {
