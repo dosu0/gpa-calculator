@@ -54,6 +54,7 @@
     }
 
     let showImportDialog = false;
+    let dialog: HTMLDialogElement;
     let importing = false;
     let county = "Fulton County";
 
@@ -89,12 +90,12 @@
 
     <SubjectList {subjects} />
 
-    <button on:click={() => (showImportDialog = true)}> Import grades from Infinite Campus </button>
+    <button on:click={() => dialog.showModal()}> Import grades from Infinite Campus </button>
     <button on:click={() => subjects.clear()}>Clear</button>
 </div>
 
-<Modal bind:show={showImportDialog}>
-    <h2 slot="title">Import grades from infinite campus</h2>
+<Modal bind:dialog>
+    <h2 slot="title">Import grades from Infinite Campus</h2>
 
     <form
         method="post"
@@ -104,6 +105,7 @@
             return async ({ update }) => {
                 await update();
                 importing = false;
+                dialog.close();
             };
         }}
     >
