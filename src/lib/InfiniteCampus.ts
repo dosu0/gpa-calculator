@@ -3,7 +3,6 @@
   This file is licensed under the GNU GPLv3 license (https://www.gnu.org/licenses/gpl-3.0.en.html)
 */
 
-"use strict";
 import { fetch } from "undici";
 import { CookieAgent } from "http-cookie-agent/undici";
 import { CookieJar } from "tough-cookie";
@@ -93,26 +92,6 @@ export interface Term {
      */
     seq: number;
     courses: Course[];
-}
-
-export enum NotificationType {
-    GradeUpdate = 2,
-    AttendanceUpdate,
-    AssignmentUpdate,
-}
-
-/**
- * @classdesc Type representing a notification. A user might get a notification for many reasons, but they are mostly for attendance, course, and grade updates.
- */
-export interface Notification {
-    // unique notification id
-    id: string;
-    link: string;
-    read: boolean;
-    text: string;
-    timestamp: number;
-    timestampText: string;
-    type: NotificationType;
 }
 
 /**
@@ -281,7 +260,7 @@ class User extends EventEmitter {
         console.info(grades);
 
         let result: any[] = []; // object that we return later
-        let crossReference: any  = {};
+        let crossReference: any = {};
 
         let schoolIndex = 0;
 
@@ -427,166 +406,6 @@ class User extends EventEmitter {
     }
 
     /**
-     * gets current number of unseen notifications <br>
-     * *note: the unseen notification count is different from the read status of an individual notification*
-     * @async
-     * @returns {integer} number of unseen notifications
-     * @example
-     * const InfiniteCampus = require('infinite-campus')
-     * const user = new InfiniteCampus('New York District', 'NY', 'JDoe12', 'XXXXXX')
-     *
-     * // wait until we are done logging in
-     * user.on('ready', () => {
-     *   // now that we are logged in, get the notification count
-     *   user.getNotificationCount().then((count) => {
-     *     console.log(count) // returns: 7
-     *   })
-     * })
-     *
-     */
-    async getNotificationCount() {
-        this.checkAuth();
-        const res = await this.fetch(
-            this.district!.district_baseurl + "prism?x=notifications.NotificationUser-countUnviewed",
-        );
-
-        const json = await res.json();
-        return parseInt(json.data.RecentNotifications.count);
-    }
-
-    /**
-     * resets the unseen notification count. This is what happens when you click on the bell icon in Infinite Campus <br>
-     * *note: this is different from the read status of individual notifications, see [User.markAllNotificationsRead()]{@link User#markAllNotificationsRead} and [Notification.toggleRead()]{@link Notification#toggleRead}*
-     * @async
-     * @example
-     * const InfiniteCampus = require('infinite-campus')
-     * const user = new InfiniteCampus('New York District', 'NY', 'JDoe12', 'XXXXXX')
-     *
-     * // wait until we are done logging in
-     * user.on('ready', () => {
-     *   // now that we are logged in, reset the notification count
-     *   user.resetNotificationCount().then(() => {
-     *     // ...
-     *   })
-     * })
-     *
-     */
-    async resetNotificationCount() {
-        this.checkAuth();
-        await this.fetch(
-            this.district.district_baseurl +
-                "prism?x=notifications.NotificationUser-updateLastViewed",
-        );
-    }
-
-    /**
-     * marks all notifications as read <br>
-     * *note: this is different from the unread count, see [User.getNotificationCount()]{@link User#getNotificationCount} and [User.resetNotificationCount()]{@link User#resetNotificationCount}*
-     * @async
-     * @example
-     * const InfiniteCampus = require('infinite-campus')
-     * const user = new InfiniteCampus('New York District', 'NY', 'JDoe12', 'XXXXXX')
-     *
-     * // wait until we are done logging in
-     * user.on('ready', () => {
-     *   // now that we are logged in, mark all notifications as read
-     *   user.markAllNotificationsRead().then(() => {
-     *     // ...
-     *   })
-     * })
-     *
-     */
-    async markAllNotificationsRead() {
-        this.checkAuth();
-        await this.fetch(
-            this.district.district_baseurl + "prism?x=notifications.Notification-markAllRead",
-        );
-    }
-
-    /**
-     * toggles a given notifications read state
-     * *note: this is different from the unread count, see [User.getNotificationCount()]{@link User#getNotificationCount} and [User.resetNotificationCount()]{@link User#resetNotificationCount}* <br>
-     * this function is included in {@link Notification}. For readability this function is private and a dock
-     * @async
-     * @private
-     */
-    async _toggleNotificationRead(id) {
-        this.checkAuth();
-        await this.fetch(
-            this.district.district_baseurl +
-                "prism?x=notifications.Notification-toggleRead&notificationID=" +
-                id,
-        );
-    }
-
-    /**
-     * Returns a list of notifications. <br>
-     * ###### notification types: <br>
-     * keep in mind mind that that this data may not be 100% accurate, more research needs to be done <br>
-     * * 2 - attendance updated (eg. you get marked tardy) <br>
-     * * 3 - course grade updated (eg. your class grade changes after an assignment is graded) <br>
-     * * 4 - assignment updated (eg. an assignment is graded or its state is updated as missing, late, etc )
-     * @async
-     * @param {integer} [limit=200] - number of notifications to return
-     * @returns {Notification[]} array of notifications
-     * @example
-     * // this example will mark all notifications before certain date as read
-     *
-     * // first we log in
-     * const InfiniteCampus = require('infinite-campus')
-     * const user = new InfiniteCampus('New York District', 'NY', 'JDoe12', 'XXXXXX')
-     *
-     * // wait until we are done logging in
-     * user.on('ready', () => {
-     *   // now that we are logged in, get notifications
-     *   user.getNotifications().then((notifications) => {
-     *     console.log(notifications)
-     *   })
-     * })
-     *
-     */
-    async getNotifications(limit: number = 200) {
-        if (typeof limit !== "number") {
-            throw new Error(
-                `[User.getNotifications(${limit})] 'limit' argument must be a number, got '${typeof limit}'`,
-            );
-        }
-        // if limit isn't set, default to 200
-        limit = limit === undefined ? 200 : limit;
-
-        const url =
-            this.district!.district_baseurl +
-            "prism?x=notifications.Notification-retrieve&limitCount=" +
-            limit +
-            "&urlFilter=portal";
-        const res = await this.fetch(url);
-        const json = (await res.json()) as any;
-        console.info(json);
-        const body = json.data.NotificationList.Notification;
-
-        let result = [];
-
-        // loop over every assignment
-        body.forEach((notification: any) => {
-            result.push({
-                id: notification.notificationID,
-                text: notification.notificationText,
-                timestamp: new Date(notification.creationTimestamp).getTime() / 1000, // convert text to unix ms to s
-                timestampText: notification.displayedDate,
-                type: notification.notificationTypeID,
-                link:
-                    this.district!.district_baseurl +
-                    notification.linkUrl +
-                    notification.linkContext,
-                read: notification.read === "true",
-                toggleRead: () => {
-                    this._toggleNotificationRead(notification.notificationID);
-                },
-            });
-        });
-    }
-
-    /**
      * helper function to make sure a user is authenticated before making API calls
      * @private
      */
@@ -602,12 +421,3 @@ class User extends EventEmitter {
 }
 
 export default User;
-
-// debugging:
-// keep debugger alive
-// setInterval(() => { console.log('keep alive') }, 100000000)
-
-// this is just plain stupid:
-// process.on('uncaughtException', function (err) {
-//   console.log('Caught exception: ' + err)
-// })
