@@ -1,4 +1,4 @@
-import type District from "./District";
+import type District from "$lib/District";
 import User from "$lib/InfiniteCampus";
 
 async function fetchDistricts() {

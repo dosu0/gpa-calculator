@@ -3,7 +3,7 @@
     import SubjectList from "$components/SubjectList.svelte";
     import Modal from "$components/Modal.svelte";
     import { derived } from "svelte/store";
-    import type District from "./District";
+    import type District from "$lib/District";
 
     export let data;
 

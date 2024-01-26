@@ -8,7 +8,7 @@ import { fetch } from "undici";
 import { CookieAgent } from "http-cookie-agent/undici";
 import { CookieJar } from "tough-cookie";
 import EventEmitter from "node:events"; // emit 'ready' event
-import type District from "../routes/District";
+import type District from "$lib/District";
 
 interface Metadata {
     version: string;
