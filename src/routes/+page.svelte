@@ -1,20 +1,12 @@
 <script lang="ts">
-    import { createSubjectList } from "./subjects";
+    import { subjects } from "./subjects";
     import SubjectList from "$components/SubjectList.svelte";
     import Modal from "$components/Modal.svelte";
     import { derived } from "svelte/store";
-    import { onMount } from "svelte";
     import type District from "./District";
 
     export let data;
 
-    let subjects = createSubjectList([
-        { name: "AP Calculus", grade: 98 },
-        { name: "Spanish 3", grade: 98 },
-        { name: "AP Computer Science A", grade: 100 },
-        { name: "10th Lit", grade: 94 },
-        { name: "AP Lang", grade: 80 },
-    ]);
 
     // whenever the subject list changes we compute the weighted and unweighted GPAs
 
@@ -53,22 +45,8 @@
         subjects.add(textBox.value, 90); // default grade in 90
         // clear the textbox
         textBox.value = "";
-        save();
     }
 
-    function save() {
-        // save the subjects to local storage
-        // TODO: we might have to save them to a database too
-        localStorage.setItem("subjects", JSON.stringify($subjects));
-    }
-
-    function load() {
-        const loaded = JSON.parse(localStorage.getItem("subjects") || "{}");
-
-        if (loaded) {
-            subjects = createSubjectList(loaded);
-        }
-    }
 
     function getDistrict(name: string): District {
         return data.districts.filter((d: District) => d.district_name == name)[0];
@@ -88,8 +66,6 @@
             return "red";
         }
     }
-
-    onMount(load);
 </script>
 
 <div class="board">
@@ -112,8 +88,6 @@
     <SubjectList {subjects} />
 
     <button on:click={() => (showImportDialog = true)}> import grades from infinite campus </button>
-    <button on:click={save}>save</button>
-    <button on:click={load}>load</button>
     <button on:click={() => subjects.clear()}>clear</button>
 </div>
 
