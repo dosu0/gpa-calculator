@@ -106,6 +106,7 @@ class User extends EventEmitter {
     hasErrorListener: boolean;
 
     constructor() {
+        console.log("creating user...");
         super(); // calls EventEmitter constructor
         this.meta = meta;
         this.authenticated = false;

@@ -4,9 +4,11 @@
     import Modal from "$components/Modal.svelte";
     import { derived } from "svelte/store";
     import type District from "$lib/District";
+    import { enhance } from "$app/forms";
 
     export let data;
-
+    // todo: use form response to update grades shown
+    // export let form;
 
     // whenever the subject list changes we compute the weighted and unweighted GPAs
 
@@ -47,13 +49,13 @@
         textBox.value = "";
     }
 
-
     function getDistrict(name: string): District {
         return data.districts.filter((d: District) => d.district_name == name)[0];
     }
 
     let showImportDialog = false;
-    let county: string;
+    let importing = false;
+    let county = "Fulton County";
 
     function gradeColor(grade: number): string {
         if (grade >= 90) {
@@ -87,21 +89,55 @@
 
     <SubjectList {subjects} />
 
-    <button on:click={() => (showImportDialog = true)}> import grades from infinite campus </button>
-    <button on:click={() => subjects.clear()}>clear</button>
+    <button on:click={() => (showImportDialog = true)}> Import grades from Infinite Campus </button>
+    <button on:click={() => subjects.clear()}>Clear</button>
 </div>
 
 <Modal bind:show={showImportDialog}>
     <h2 slot="title">Import grades from infinite campus</h2>
-    <span>select a county:</span>
-    <select bind:value={county}>
-        {#each data.districts as district (district.id)}
-            <option>{district.district_name}</option>
-        {/each}
-    </select>
 
-    {#if county}
-        <a href={getDistrict(county).student_login_url}>link</a>
+    <form
+        method="post"
+        use:enhance={() => {
+            importing = true;
+
+            return async ({ update }) => {
+                await update();
+                importing = false;
+            };
+        }}
+    >
+        <label>
+            select a county:
+            <select name="district" bind:value={county} required>
+                {#each data.districts as district (district.id)}
+                    <option>{district.district_name}</option>
+                {/each}
+            </select>
+        </label>
+
+        {#if county}
+            <a href={getDistrict(county).student_login_url}>link</a>
+        {/if}
+        <br />
+
+        <label>
+            Username:
+            <input name="username" type="text" required />
+        </label>
+        <br />
+
+        <label>
+            Password:
+            <input name="password" type="password" required />
+        </label>
+        <br />
+
+        <input type="submit" value="Import" />
+    </form>
+
+    {#if importing}
+        <span>importing...</span>
     {/if}
 </Modal>
 
@@ -117,6 +153,7 @@
         font-size: 1.4em;
         padding: 0.5em;
         margin: 0 0 1rem 0rem;
+        width: 100%;
     }
 
     span {
@@ -129,7 +166,7 @@
         margin-left: 3rem;
     }
 
-    input {
-        width: 100%;
+    form {
+        display: block;
     }
 </style>
