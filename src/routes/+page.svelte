@@ -7,8 +7,6 @@
     import { enhance } from "$app/forms";
 
     export let data;
-    // todo: use form response to update grades shown
-    // export let form;
 
     // whenever the subject list changes we compute the weighted and unweighted GPAs
 
@@ -18,6 +16,9 @@
         let totalGrade = 0;
         for (let subject of $subjects) {
             totalGrade += subject.grade;
+            if (subject.weighted) {
+                totalGrade += 7;
+            }
         }
 
         return totalGrade / $subjects.length;
@@ -29,9 +30,6 @@
         let totalGrade = 0;
         for (let subject of $subjects) {
             totalGrade += subject.grade;
-            if (subject.weighted) {
-                totalGrade -= 7;
-            }
         }
 
         return totalGrade / $subjects.length;
@@ -53,7 +51,6 @@
         return data.districts.filter((d: District) => d.district_name == name)[0];
     }
 
-    let showImportDialog = false;
     let dialog: HTMLDialogElement;
     let importing = false;
     let county = "Fulton County";
