@@ -41,6 +41,7 @@ export interface Grades {
 export interface Placement {
     startTime: string;
     endTime: string;
+    periodSeq: number;
     periodName: string;
 }
 
@@ -260,7 +261,7 @@ class User extends EventEmitter {
         let grades = (await res.json()) as any;
         console.info(grades);
 
-        let result: any[] = []; // object that we return later
+        let result: Term[] = []; // object that we return later
         let crossReference: any = {};
 
         let schoolIndex = 0;
