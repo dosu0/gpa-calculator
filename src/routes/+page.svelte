@@ -125,13 +125,13 @@
 
         <label>
             Username:
-            <input name="username" type="text" required />
+            <input name="username" type="text" autocomplete="username" required />
         </label>
         <br />
 
         <label>
             Password:
-            <input name="password" type="password" required />
+            <input name="password" type="password" autocomplete="current-password" required />
         </label>
         <br />
 
