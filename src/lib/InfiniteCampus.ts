@@ -316,7 +316,8 @@ class User extends EventEmitter {
 
             // loop over classes in a term
             term.courses.forEach((course: any, ii: number) => {
-                // grading task 4 = Final Grade
+                // grading task 4 = Final Grade @ Alpharetta Highschool
+                // might be different at other schools 
                 const grade = course.gradingTasks[4];
 
                 const courseResult: Course = {
