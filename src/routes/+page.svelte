@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { isWeighted, subjects } from "$stores/subjects";
+    import { isWeighted, subjects, subjectList } from "$stores/subjects";
     import SubjectList from "$components/SubjectList.svelte";
     import Modal from "$components/Modal.svelte";
     import { derived } from "svelte/store";
@@ -98,7 +98,19 @@
         </span>
     </h2>
 
-    <input placeholder="enter a subject..." type="text" on:keydown={handleKeydown} />
+    <input
+        list="subjects"
+        name="subject"
+        placeholder="enter a subject..."
+        type="text"
+        on:keydown={handleKeydown}
+    />
+
+    <datalist id="subjects">
+        {#each subjectList as subject}
+            <option value={subject}></option>
+        {/each}
+    </datalist>
 
     <SubjectList {subjects} />
 

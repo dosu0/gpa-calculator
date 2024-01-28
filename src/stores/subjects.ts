@@ -90,3 +90,65 @@ subjects.subscribe((value) => {
     // again svelte uses server side rendering, so we must make sure we are in the browser
     if (browser) localStorage.setItem("subjects", JSON.stringify(value));
 });
+
+// list of subjects for the dropdown menu
+// from: https://www.fultonschools.org/site/handlers/filedownload.ashx?moduleinstanceid=58907&dataid=127455&FileName=Course%20Catalog%20for%20School%20Year%202023-2024.pdf
+export const subjectList = [
+    // ELA
+    "9th Grade Lit/Comp",
+    "9th Grade Lit/Comp Honors",
+    "World Lit/Comp",
+    "World Lit/Comp Honors",
+    "AP Seminar",
+    "11th American Lit/Comp",
+    "11th American Lit/Comp Honors",
+    "AP Language",
+    "IB Language and Literature A",
+    "British (English) Lit/Comp",
+    "Advanced Composition Honors",
+    "AP Literature & Composition",
+
+    // Math
+    "Algebra I",
+    "Algebra I Honors",
+    "Geometry",
+    "Geometry Honors",
+    "Algebra II",
+    "Algebra II Honors",
+    "Precalculus",
+    "Precalculus Honors",
+    "AP Calculus AB",
+    "AP Calculus BC",
+    "AP Statistics",
+    "IB Math",
+
+    // Science
+    "Biology",
+    "Biology Honors",
+    "Earth Systems",
+    "Physical Science",
+    "Chemistry",
+    "Chemistry Honors",
+    "Physics",
+    "Environmental Science",
+    "AP Biology",
+    "AP Environmental Science",
+    "AP Chemistry",
+    "AP Physics 1",
+    "AP Physics 2",
+    "AP Physics C",
+    "IB Chemistry",
+    "IB Physics",
+
+    // Social Studies
+    "American Government/Civics",
+    "AP Government/Politics U.S.",
+    "World History",
+    "AP World History",
+    "US History",
+    "AP US History",
+    "AP Macroeconomics",
+    "AP Microeconomics",
+    "AP Psychology",
+    "AP Human Geography",
+];
