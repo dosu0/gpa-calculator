@@ -5,18 +5,29 @@
     import { slide } from "svelte/transition";
 
     export let subjects: SubjectStore;
+
+    function validate(i: number) {
+        if ($subjects[i].grade > 120) $subjects[i].grade = 120;
+        if ($subjects[i].grade < 0) $subjects[i].grade = 0;
+    }
 </script>
 
 <ul>
     <!--  TODO: add weighted/unweighted switch -->
-    {#each $subjects as subject (subject.id)}
+    {#each $subjects as subject, i (subject.id)}
         <li transition:slide|global>
             <label>
                 <span>{subject.name}</span>
                 {#if subject.weighted}
                     <caption>(weighted)</caption>
                 {/if}
-                <input type="number" min={"0"} bind:value={subject.grade} />
+                <input
+                    type="number"
+                    min={0}
+                    max={120}
+                    bind:value={subject.grade}
+                    on:input={() => validate(i)}
+                />
                 <button on:click={() => subjects.remove(subject)}>Remove</button>
             </label>
         </li>
