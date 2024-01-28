@@ -22,7 +22,7 @@ export interface SubjectStore extends Writable<Subject[]> {
 }
 
 export function isWeighted(name: string): boolean {
-    let advancedIndicators = new RegExp(/advanced|ap|honors/i);
+    const advancedIndicators = new RegExp(/advanced|ap|honors/i);
     return advancedIndicators.test(name) || name.endsWith(" H") || name.endsWith(" h");
 }
 export function createSubjectList(initialSubjects: InitialSubject[]): SubjectStore {

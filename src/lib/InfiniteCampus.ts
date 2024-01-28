@@ -99,7 +99,7 @@ export interface Term {
  * Class representing an authenticated Infinite Campus user
  */
 class User extends EventEmitter {
-    meta: any;
+    meta: Metadata;
     authenticated: boolean;
     cookieAgent: CookieAgent;
     headers: Headers;
@@ -182,10 +182,11 @@ class User extends EventEmitter {
             const res = await this.fetch(url);
             // district.handle(err, res, body);
             switch (res.status) {
-                case 200:
+                case 200: {
                     const json = (await res.json()) as any;
                     this.district = json.data[0];
                     break;
+                }
                 case 404:
                     throw new Error(`${districtName} not found`);
                 default:
@@ -254,21 +255,21 @@ class User extends EventEmitter {
                 "resources/portal/roster?_expand=%7BsectionPlacements-%7Bterm%7D%7D",
         );
 
-        let roster = (await res.json()) as any;
+        const roster = (await res.json()) as any;
 
         // request grades
         res = await this.fetch(this.district!.district_baseurl + "resources/portal/grades");
-        let grades = (await res.json()) as any;
+        const grades = (await res.json()) as any;
 
-        let result: Term[] = []; // object that we return later
-        let crossReference: any = {};
+        const result: Term[] = []; // object that we return later
+        const crossReference: any = {};
 
         let schoolIndex = 0;
 
         // if we are enrolled in multiple schools
         if (grades.length > 1) {
             // build list of schools
-            let schools: any[] = [];
+            const schools: any[] = [];
             grades.forEach((school: any) => {
                 schools.push({
                     schoolName: school.displayName,
@@ -305,7 +306,7 @@ class User extends EventEmitter {
 
         // loop over terms from /grades
         grades[schoolIndex].terms.forEach((term: any, i: number) => {
-            let termResult: Term = {
+            const termResult: Term = {
                 name: term.termName,
                 seq: term.termSeq,
                 startDate: term.startDate,
@@ -316,9 +317,9 @@ class User extends EventEmitter {
             // loop over classes in a term
             term.courses.forEach((course: any, ii: number) => {
                 // grading task 4 = Final Grade
-                let grade = course.gradingTasks[4];
+                const grade = course.gradingTasks[4];
 
-                let courseResult: Course = {
+                const courseResult: Course = {
                     name: course.courseName,
                     courseNumber: course.courseNumber,
                     roomName: course.roomName,
@@ -379,12 +380,12 @@ class User extends EventEmitter {
 
         // loop over classes from /roster
         roster.forEach((course: any, i: number) => {
-            let placement = course.sectionPlacements[0];
+            const placement = course.sectionPlacements[0];
 
             // find course from cross reference
-            let ref = crossReference[roster[i]._id];
+            const ref = crossReference[roster[i]._id];
             if (!ref) return;
-            let target = result[ref.i].courses[ref.ii];
+            const target = result[ref.i].courses[ref.ii];
 
             // add placement data
             target.placement = {

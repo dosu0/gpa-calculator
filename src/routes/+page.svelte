@@ -114,7 +114,7 @@
         use:enhance={() => {
             importing = true;
 
-            return async ({ update, result }) => {
+            return async ({ update }) => {
                 await update();
                 importing = false;
                 dialog.close();
