@@ -14,4 +14,5 @@
         input a new grade
     </li>
     <li>Alternatively, click on the up and down arrows</li>
+    <li style="color: red;">Make sure to input your <b>unweighted</b> grades</li>
 </ul>
