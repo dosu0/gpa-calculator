@@ -1,14 +1,11 @@
 <!-- This component contains the list of subjects -->
 
 <script lang="ts">
-    import type { SubjectStore } from "./subjects";
-    import {slide} from "svelte/transition";
-    
+    import type { SubjectStore } from "$stores/subjects";
+    import { slide } from "svelte/transition";
+
     export let subjects: SubjectStore;
-
-    
 </script>
-
 
 <ul>
     <!--  TODO: add weighted/unweighted switch -->
@@ -17,7 +14,7 @@
             <label>
                 <span>{subject.name}</span>
                 {#if subject.weighted}
-                 <caption>(weighted)</caption>
+                    <caption>(weighted)</caption>
                 {/if}
                 <input type="number" min={"0"} bind:value={subject.grade} />
                 <button on:click={() => subjects.remove(subject)}>Remove</button>
@@ -34,18 +31,17 @@
     }
 
     input {
-        max-width: 4em;
+        max-width: 6em;
     }
 
     span {
         flex: 1;
     }
-    
+
     ul {
         align-items: center;
         list-style-type: none;
         margin: 0 0 1em 0;
-
     }
 
     caption {

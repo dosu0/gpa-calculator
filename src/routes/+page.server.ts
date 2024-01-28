@@ -1,7 +1,6 @@
 import type District from "$lib/District";
 import User from "$lib/InfiniteCampus";
-import type { Term, Course } from "$lib/InfiniteCampus";
-import { v4 as uuid } from "uuid";
+import { fail } from "@sveltejs/kit";
 
 async function fetchDistricts() {
     const url = `https://mobile.infinitecampus.com/api/district/searchDistrict?query=county&state=GA`;
@@ -14,33 +13,35 @@ async function fetchDistricts() {
 
 type Load = {
     districts: District[];
-    courses: Term[];
 };
 
-const db: Map<string, Term[]> = new Map();
-
-export async function load({ cookies }): Promise<Load> {
+export async function load(): Promise<Load> {
     // TODO: log user in
     // await user.login("Fulton County", "GA", "userid", "password");
 
     return {
         districts: await fetchDistricts(),
-        courses: db.get(cookies.get("sessionid")),
     };
 }
 
 export const actions = {
-    default: async ({ cookies, request }) => {
+    default: async ({ request }) => {
         const data = await request.formData();
-        const sessionid = uuid();
-        cookies.set("sessionid", sessionid, { path: "/" });
+
+        const district = data.get("district")?.toString();
+        const username = data.get("username")?.toString();
+        const password = data.get("password")?.toString();
+
+        if (!district || !username || !password) {
+            return fail(422, {
+                message: "missing login info",
+            });
+        }
 
         const user = new User();
-        await user.login(data.get("district"), "GA", data.get("username"), data.get("password"));
-        const courses = await user.getCourses(0);
+        await user.login(district, "GA", username, password);
+        const terms = await user.getTerms();
 
-        db.set(sessionid, courses);
-
-        return courses;
+        return { success: true, data: terms };
     },
 };

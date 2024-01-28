@@ -10,6 +10,7 @@ const config = {
     kit: {
         alias: {
             $components: "./src/components",
+            $stores: "./src/stores",
         },
         // See https://kit.svelte.dev/docs/adapters for more information about adapters.
         adapter: adapter(),

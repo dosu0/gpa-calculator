@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { subjects } from "./subjects";
+    import { isWeighted, subjects } from "$stores/subjects";
     import SubjectList from "$components/SubjectList.svelte";
     import Modal from "$components/Modal.svelte";
     import { derived } from "svelte/store";
@@ -7,6 +7,21 @@
     import { enhance } from "$app/forms";
 
     export let data;
+    export let form;
+
+    // if the user imported from infinite campus, use those grades instead
+    $: if (form?.success) {
+        form.data.forEach((term) => {
+            let courses = term.courses.map((course, i) => ({
+                name: course.name,
+                grade: course.grades?.percent || 100,
+                id: i,
+                weighted: isWeighted(course.name),
+            }));
+
+            subjects.update(() => courses);
+        });
+    }
 
     // whenever the subject list changes we compute the weighted and unweighted GPAs
 
@@ -99,7 +114,7 @@
         use:enhance={() => {
             importing = true;
 
-            return async ({ update }) => {
+            return async ({ update, result }) => {
                 await update();
                 importing = false;
                 dialog.close();

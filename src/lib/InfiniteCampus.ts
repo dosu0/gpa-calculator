@@ -246,7 +246,7 @@ class User extends EventEmitter {
      * })
      *
      */
-    async getCourses(schoolID: number | undefined): Promise<Term[]> {
+    async getTerms(schoolID: number = 0): Promise<Term[]> {
         this.checkAuth();
         // request roster with placements
         let res = await this.fetch(
@@ -259,7 +259,6 @@ class User extends EventEmitter {
         // request grades
         res = await this.fetch(this.district!.district_baseurl + "resources/portal/grades");
         let grades = (await res.json()) as any;
-        console.info(grades);
 
         let result: Term[] = []; // object that we return later
         let crossReference: any = {};
@@ -316,7 +315,8 @@ class User extends EventEmitter {
 
             // loop over classes in a term
             term.courses.forEach((course: any, ii: number) => {
-                let grade = course.gradingTasks[0];
+                // grading task 4 = Final Grade
+                let grade = course.gradingTasks[4];
 
                 let courseResult: Course = {
                     name: course.courseName,
