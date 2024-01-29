@@ -42,7 +42,7 @@
     }
 
     input {
-        max-width: 6em;
+        width: 5em;
     }
 
     span {
