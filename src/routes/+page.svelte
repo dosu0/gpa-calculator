@@ -193,7 +193,7 @@
     </p>
 
     <p>
-        <b>Lowest Grade:</b>
+        <b>Highest Grade:</b>
         <span style="color: {gradeColor($highestGrade.grade)}">
             {$highestGrade.grade.toFixed(2)}
             ({$highestGrade.name})
