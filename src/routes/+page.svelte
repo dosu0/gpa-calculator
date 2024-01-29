@@ -50,6 +50,54 @@
         return totalGrade / $subjects.length;
     });
 
+    let lowestGrade = derived(subjects, ($subjects) => {
+        if ($subjects.length === 0) {
+            return {
+                grade: 0,
+                name: "None",
+            };
+        }
+
+        let min = $subjects[0].grade;
+        let className = $subjects[0].name;
+
+        for (let { name, grade } of $subjects) {
+            if (grade < min) {
+                min = grade;
+                className = name;
+            }
+        }
+
+        return {
+            grade: min,
+            name: className,
+        };
+    });
+
+    let highestGrade = derived(subjects, ($subjects) => {
+        if ($subjects.length === 0) {
+            return {
+                grade: 0,
+                name: "None",
+            };
+        }
+
+        let max = $subjects[0].grade;
+        let className = $subjects[0].name;
+
+        for (let { name, grade } of $subjects) {
+            if (grade > max) {
+                max = grade;
+                className = name;
+            }
+        }
+
+        return {
+            grade: max,
+            name: className,
+        };
+    });
+
     function handleKeydown(event: KeyboardEvent) {
         // only add a new subject if the user presses the "Enter" key
         if (event.key !== "Enter") return;
@@ -66,7 +114,8 @@
         return data.districts.filter((d: District) => d.district_name == name)[0];
     }
 
-    let dialog: HTMLDialogElement;
+    let importDialog: HTMLDialogElement;
+    let reportDialog: HTMLDialogElement;
     let importing = false;
     let county = "Fulton County";
 
@@ -114,11 +163,45 @@
 
     <SubjectList {subjects} />
 
-    <button on:click={() => dialog.showModal()}> Import grades from Infinite Campus </button>
+    <button on:click={() => importDialog.showModal()}>Import grades from Infinite Campus</button>
+    <button on:click={() => reportDialog.showModal()}>Show Report</button>
     <button on:click={() => subjects.clear()}>Clear</button>
 </div>
 
-<Modal bind:dialog>
+<Modal bind:dialog={reportDialog}>
+    <h2 slot="title">Grade Report</h2>
+
+    <p>
+        <b>GPA:</b>
+        <span style="color: {gradeColor($weightedGPA)}">
+            {$weightedGPA.toFixed(2)}
+        </span>
+    </p>
+    <p>
+        <b>Unweighted GPA:</b>
+        <span style="color: {gradeColor($unweightedGPA)}">
+            {$unweightedGPA.toFixed(2)}
+        </span>
+    </p>
+
+    <p>
+        <b>Lowest Grade:</b>
+        <span style="color: {gradeColor($lowestGrade.grade)}">
+            {$lowestGrade.grade.toFixed(2)}
+            ({$lowestGrade.name})
+        </span>
+    </p>
+
+    <p>
+        <b>Lowest Grade:</b>
+        <span style="color: {gradeColor($highestGrade.grade)}">
+            {$highestGrade.grade.toFixed(2)}
+            ({$highestGrade.name})
+        </span>
+    </p>
+</Modal>
+
+<Modal bind:dialog={importDialog}>
     <h2 slot="title">Import grades from Infinite Campus</h2>
 
     <form
@@ -129,7 +212,7 @@
             return async ({ update }) => {
                 await update();
                 importing = false;
-                dialog.close();
+                importDialog.close();
             };
         }}
     >
