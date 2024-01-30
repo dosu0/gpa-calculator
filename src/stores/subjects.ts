@@ -1,6 +1,6 @@
 import { browser } from "$app/environment";
 import type { Writable } from "svelte/store";
-import { writable } from "svelte/store";
+import { writable, derived } from "svelte/store";
 
 export interface Subject {
     id: number;
@@ -25,6 +25,7 @@ export function isWeighted(name: string): boolean {
     const advancedIndicators = new RegExp(/advanced|ap|honors|ib/i);
     return advancedIndicators.test(name) || name.endsWith(" H") || name.endsWith(" h");
 }
+
 export function createSubjectList(initialSubjects: InitialSubject[]): SubjectStore {
     let id = 0;
 
@@ -196,3 +197,78 @@ export const subjectList = [
     "AP Computer Science A",
     "Essentials of Healthcare",
 ];
+
+// whenever the subject list changes we compute the weighted and unweighted GPAs
+
+export let weightedGPA = derived(subjects, ($subjects) => {
+    if ($subjects.length === 0) return 0;
+
+    let totalGrade = 0;
+    for (let subject of $subjects) {
+        totalGrade += subject.grade;
+        if (subject.weighted) {
+            totalGrade += 7;
+        }
+    }
+
+    return totalGrade / $subjects.length;
+});
+
+export const unweightedGPA = derived(subjects, ($subjects) => {
+    if ($subjects.length === 0) return 0;
+
+    let totalGrade = 0;
+    for (let subject of $subjects) {
+        totalGrade += subject.grade;
+    }
+
+    return totalGrade / $subjects.length;
+});
+
+export const lowestGrade = derived(subjects, ($subjects) => {
+    if ($subjects.length === 0) {
+        return {
+            grade: 0,
+            name: "None",
+        };
+    }
+
+    let min = $subjects[0].grade;
+    let className = $subjects[0].name;
+
+    for (let { name, grade } of $subjects) {
+        if (grade < min) {
+            min = grade;
+            className = name;
+        }
+    }
+
+    return {
+        grade: min,
+        name: className,
+    };
+});
+
+export const highestGrade = derived(subjects, ($subjects) => {
+    if ($subjects.length === 0) {
+        return {
+            grade: 0,
+            name: "None",
+        };
+    }
+
+    let max = $subjects[0].grade;
+    let className = $subjects[0].name;
+
+    for (let { name, grade } of $subjects) {
+        if (grade > max) {
+            max = grade;
+            className = name;
+        }
+    }
+
+    return {
+        grade: max,
+        name: className,
+    };
+});

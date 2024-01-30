@@ -1,8 +1,15 @@
 <script lang="ts">
-    import { isWeighted, subjects, subjectList } from "$stores/subjects";
+    import  {
+        isWeighted,
+        subjects,
+        subjectList,
+        weightedGPA,
+        unweightedGPA,
+        lowestGrade,
+        highestGrade,
+    } from "$stores/subjects";
     import SubjectList from "$components/SubjectList.svelte";
     import Modal from "$components/Modal.svelte";
-    import { derived } from "svelte/store";
     import type District from "$lib/District";
     import { enhance } from "$app/forms";
 
@@ -14,7 +21,7 @@
         form.data.forEach((term) => {
             let courses = term.courses.map((course, i) => ({
                 name: course.name,
-                grade: course.grades?.percent || 100,
+                grade: course.grades?.percent || 0,
                 id: i,
                 weighted: isWeighted(course.name),
             }));
@@ -22,81 +29,6 @@
             subjects.update(() => courses);
         });
     }
-
-    // whenever the subject list changes we compute the weighted and unweighted GPAs
-
-    let weightedGPA = derived(subjects, ($subjects) => {
-        if ($subjects.length === 0) return 0;
-
-        let totalGrade = 0;
-        for (let subject of $subjects) {
-            totalGrade += subject.grade;
-            if (subject.weighted) {
-                totalGrade += 7;
-            }
-        }
-
-        return totalGrade / $subjects.length;
-    });
-
-    let unweightedGPA = derived(subjects, ($subjects) => {
-        if ($subjects.length === 0) return 0;
-
-        let totalGrade = 0;
-        for (let subject of $subjects) {
-            totalGrade += subject.grade;
-        }
-
-        return totalGrade / $subjects.length;
-    });
-
-    let lowestGrade = derived(subjects, ($subjects) => {
-        if ($subjects.length === 0) {
-            return {
-                grade: 0,
-                name: "None",
-            };
-        }
-
-        let min = $subjects[0].grade;
-        let className = $subjects[0].name;
-
-        for (let { name, grade } of $subjects) {
-            if (grade < min) {
-                min = grade;
-                className = name;
-            }
-        }
-
-        return {
-            grade: min,
-            name: className,
-        };
-    });
-
-    let highestGrade = derived(subjects, ($subjects) => {
-        if ($subjects.length === 0) {
-            return {
-                grade: 0,
-                name: "None",
-            };
-        }
-
-        let max = $subjects[0].grade;
-        let className = $subjects[0].name;
-
-        for (let { name, grade } of $subjects) {
-            if (grade > max) {
-                max = grade;
-                className = name;
-            }
-        }
-
-        return {
-            grade: max,
-            name: className,
-        };
-    });
 
     function handleKeydown(event: KeyboardEvent) {
         // only add a new subject if the user presses the "Enter" key
