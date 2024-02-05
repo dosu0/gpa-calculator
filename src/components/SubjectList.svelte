@@ -6,14 +6,17 @@
 
     export let subjects: SubjectStore;
 
+    // Given a subject, we make sure that its grade is between 0 and 102
     function validate(i: number) {
-        if ($subjects[i].grade > 120) $subjects[i].grade = 120;
+        if ($subjects[i].grade > 102) $subjects[i].grade = 102;
         if ($subjects[i].grade < 0) $subjects[i].grade = 0;
     }
 </script>
 
 <ul>
-    <!--  TODO: add weighted/unweighted switch -->
+    <!--This is a svelte for loop, 
+        we use this to generate HTML for every subject 
+    -->
     {#each $subjects as subject, i (subject.id)}
         <li transition:slide|global>
             <label>
@@ -21,10 +24,11 @@
                 {#if subject.weighted}
                     <caption>(weighted)</caption>
                 {/if}
+
                 <input
                     type="number"
                     min={0}
-                    max={120}
+                    max={102}
                     bind:value={subject.grade}
                     on:input={() => validate(i)}
                 />
@@ -39,6 +43,7 @@
         width: 100%;
         height: 100%;
         display: flex;
+        color: white;
     }
 
     input {
