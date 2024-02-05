@@ -16,7 +16,7 @@ interface Metadata {
 
 const meta: Metadata = {
     version: "0.0.1",
-    github: "plat-phoenix/infinite-campus",
+    github: "dosu0/gpa-calculator",
 };
 
 /*
@@ -112,6 +112,7 @@ class User extends EventEmitter {
         this.meta = meta;
         this.authenticated = false;
         const jar = new CookieJar();
+        // a cookie agent helps us store the login cookies that infinite campus sets in the headers
         this.cookieAgent = new CookieAgent({ cookies: { jar } });
 
         this.headers = new Headers({
@@ -219,11 +220,11 @@ class User extends EventEmitter {
             this.district.district_app_name;
         try {
             const res = await this.fetch(url);
-            if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+            const text = await res.text();
+            if (!res.ok || text.match(/error/))
+                throw new Error(`${res.status} ${text}`);
 
             console.info("INFO: Login successful");
-
-            // login.handle(err, res, body);
         } catch (err) {
             return this.emit("error", err);
         }
@@ -317,7 +318,7 @@ class User extends EventEmitter {
             // loop over classes in a term
             term.courses.forEach((course: any, ii: number) => {
                 // grading task 4 = Final Grade @ Alpharetta Highschool
-                // might be different at other schools 
+                // might be different at other schools
                 const grade = course.gradingTasks[4];
 
                 const courseResult: Course = {
