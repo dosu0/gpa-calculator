@@ -34,12 +34,22 @@ export const actions = {
 
         if (!district || !username || !password) {
             return fail(422, {
-                message: "missing login info",
+                district,
+                username,
+                missing: true,
             });
         }
 
         const user = new User();
-        await user.login(district, "GA", username, password);
+        try {
+            await user.login(district, "GA", username, password);
+        } catch (err) {
+            return fail(422, {
+                district,
+                username,
+                invalid: true,
+            });
+        }
         const terms = await user.getTerms();
 
         return { success: true, data: terms };
