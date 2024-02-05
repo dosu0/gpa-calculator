@@ -1,11 +1,19 @@
 import { browser } from "$app/environment";
 import type { Writable } from "svelte/store";
 import { writable, derived } from "svelte/store";
+import { v4 as uuid } from "uuid";
 
 export interface Subject {
-    id: number;
+    // Each subject is given an id, so that subjects with the same name can be differentiated
+    id: string;
+    // When weighted is true, 7 points are added during the weighted gpa calculation
+    // Otherwise, nothing is added
+    // This is used in Advanced, AP, IB, and Honors coures
     weighted: boolean;
+    // The subject name
     name: string;
+    // The current unweighted grade percent (without +7 points)
+    // The 7 honors points are calculated after the fact
     grade: number;
 }
 
@@ -21,18 +29,26 @@ export interface SubjectStore extends Writable<Subject[]> {
     clear: () => void;
 }
 
+// Given a subject name this method returns whether or not the subject
+// should be given weighted points
 export function isWeighted(name: string): boolean {
+    // Subjects are marked as weighted whenever they contain the words
+    // advanced, ap, honors, or ib
+    // the "/i" at the end of the regular expression 
+    // makes the comparison case insensitive
     const advancedIndicators = new RegExp(/advanced|ap|honors|ib/i);
+
+    // In addition, we check if the letter H is present at the end of
+    // the subject name, as that is often used to indicate that a course
+    // is weighted
     return advancedIndicators.test(name) || name.endsWith(" H") || name.endsWith(" h");
 }
 
 export function createSubjectList(initialSubjects: InitialSubject[]): SubjectStore {
-    let id = 0;
-
     const subjects = initialSubjects.map((subject) => ({
         ...subject,
         weighted: isWeighted(subject.name),
-        id: id++,
+        id: uuid(),
     }));
 
     const { subscribe, update, set } = writable(subjects);
@@ -43,7 +59,7 @@ export function createSubjectList(initialSubjects: InitialSubject[]): SubjectSto
         update,
         add: (name: string, grade: number = 90) => {
             const subject = {
-                id: id++,
+                id: uuid(),
                 name,
                 grade,
                 weighted: isWeighted(name),
@@ -84,12 +100,13 @@ const defaultSubjects = [
 // if it doesn't exist, then we load an example list of subjects
 export const subjects = createSubjectList(load() || defaultSubjects);
 
-// implement auto-save
-// TODO: make a settings menu where you can toggle this feature
-// the subscribe method on a store allows us to listen for when the subjects are updated
-subjects.subscribe((value) => {
-    // again svelte uses server side rendering, so we must make sure we are in the browser
-    if (browser) localStorage.setItem("subjects", JSON.stringify(value));
+
+// The subscribe method on a store allows us to listen for when the subjects are updated
+subjects.subscribe((currentSubjects) => {
+    // First we check if we're in the browser
+    // If we are, then convert the user's current subjects to a string
+    // Then we save this to a variable called subjects in the localStorage
+    if (browser) localStorage.setItem("subjects", JSON.stringify(currentSubjects));
 });
 
 // list of subjects for the dropdown menu
@@ -200,17 +217,28 @@ export const subjectList = [
 
 // whenever the subject list changes we compute the weighted and unweighted GPAs
 
+// This creates a derived store, so that whenever the list of subjects changes,
+// The gpa is recalculated
 export let weightedGPA = derived(subjects, ($subjects) => {
+    // If there are no subjects, we early return with 0
     if ($subjects.length === 0) return 0;
 
     let totalGrade = 0;
+
     for (let subject of $subjects) {
-        totalGrade += subject.grade;
+        // Here we add the grade to the total
+        // If it doesn't exist (maybe the user didn't enter anything),
+        // Then we replace the grade with 0
+        totalGrade += subject.grade || 0;
+
+        // Here we add 7 honors points if the subject is weighted
+        // That is, an AP, IB, advanced, or honors course
         if (subject.weighted) {
             totalGrade += 7;
         }
     }
 
+    // Then we return the average by dividing the total by the length
     return totalGrade / $subjects.length;
 });
 
@@ -219,7 +247,7 @@ export const unweightedGPA = derived(subjects, ($subjects) => {
 
     let totalGrade = 0;
     for (let subject of $subjects) {
-        totalGrade += subject.grade;
+        totalGrade += subject.grade || 0;
     }
 
     return totalGrade / $subjects.length;
@@ -244,7 +272,7 @@ export const lowestGrade = derived(subjects, ($subjects) => {
     }
 
     return {
-        grade: min,
+        grade: min || 0,
         name: className,
     };
 });
@@ -268,7 +296,7 @@ export const highestGrade = derived(subjects, ($subjects) => {
     }
 
     return {
-        grade: max,
+        grade: max || 102,
         name: className,
     };
 });
