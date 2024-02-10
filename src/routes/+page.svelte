@@ -11,6 +11,8 @@
     import SubjectList from "$components/SubjectList.svelte";
     import Modal from "$components/Modal.svelte";
     import type District from "$lib/District";
+
+    import type { Subject } from "$stores/subjects";
     import { enhance } from "$app/forms";
     import { v4 as uuid } from "uuid";
 
@@ -19,13 +21,14 @@
 
     // if the user imported from infinite campus, use those grades instead
     $: if (form?.success) {
-        let terms = [];
+        let terms: Subject[][] = [];
         form.data.forEach((term, i) => {
             let courses = term.courses.map((course) => ({
-                name: `${course.name} (${i + 1})`,
+                name: course.name,
                 grade: course.grades?.percent || 0,
                 id: uuid(),
                 weighted: isWeighted(course.name),
+                term: i + 1,
             }));
 
             terms.push(courses);

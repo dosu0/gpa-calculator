@@ -50,6 +50,7 @@ export const actions = {
                 invalid: true,
             });
         }
+
         const terms = await user.getTerms();
 
         return { success: true, data: terms };

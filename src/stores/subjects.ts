@@ -15,6 +15,8 @@ export interface Subject {
     // The current unweighted grade percent (without +7 points)
     // The 7 honors points are calculated after the fact
     grade: number;
+    // A term can either be a semester (so 1 and 2), or in a quarter system can be (1-4)
+    term: number;
 }
 
 export interface InitialSubject {
@@ -34,7 +36,7 @@ export interface SubjectStore extends Writable<Subject[]> {
 export function isWeighted(name: string): boolean {
     // Subjects are marked as weighted whenever they contain the words
     // advanced, ap, honors, or ib
-    // the "/i" at the end of the regular expression 
+    // the "/i" at the end of the regular expression
     // makes the comparison case insensitive
     const advancedIndicators = new RegExp(/advanced|ap|honors|ib/i);
 
@@ -49,6 +51,7 @@ export function createSubjectList(initialSubjects: InitialSubject[]): SubjectSto
         ...subject,
         weighted: isWeighted(subject.name),
         id: uuid(),
+        term: 1,
     }));
 
     const { subscribe, update, set } = writable(subjects);
@@ -57,12 +60,13 @@ export function createSubjectList(initialSubjects: InitialSubject[]): SubjectSto
         subscribe,
         set,
         update,
-        add: (name: string, grade: number = 90) => {
+        add: (name: string, grade: number = 90, term: number = 1) => {
             const subject = {
                 id: uuid(),
                 name,
                 grade,
                 weighted: isWeighted(name),
+                term,
             };
             update(($subjects) => [...$subjects, subject]);
         },
@@ -99,7 +103,6 @@ const defaultSubjects = [
 // attempts to load subjects from the browser's local storage
 // if it doesn't exist, then we load an example list of subjects
 export const subjects = createSubjectList(load() || defaultSubjects);
-
 
 // The subscribe method on a store allows us to listen for when the subjects are updated
 subjects.subscribe((currentSubjects) => {

@@ -1,20 +1,14 @@
 <!-- This component contains the list of subjects -->
 
 <script lang="ts">
-    import type { SubjectStore } from "$stores/subjects";
     import { slide } from "svelte/transition";
-    import { subjects } from "$stores/subjects"
-    import { derived } from "svelte/store";
+    import { subjects } from "$stores/subjects";
 
     // Given a subject, we make sure that its grade is between 0 and 102
     function validate(i: number) {
         if ($subjects[i].grade > 102) $subjects[i].grade = 102;
         if ($subjects[i].grade < 0) $subjects[i].grade = 0;
     }
-
-    const firstSemesterSubjects = derived(subjects, ($subjects) => {
-        return $subjects.filter((subject) => subject.name.match(/(1)/) == 1);
-    });
 </script>
 
 <ul>
@@ -22,23 +16,49 @@
         we use this to generate HTML for every subject 
     -->
     {#each $subjects as subject, i (subject.id)}
-        <li transition:slide|global>
-            <label>
-                <span>{subject.name}</span>
-                {#if subject.weighted}
-                    <caption>(weighted)</caption>
-                {/if}
+        {#if subject.term === 1}
+            <li transition:slide|global>
+                <label>
+                    <span>{subject.name}</span>
+                    {#if subject.weighted}
+                        <caption>(weighted)</caption>
+                    {/if}
 
-                <input
-                    type="number"
-                    min={0}
-                    max={102}
-                    bind:value={subject.grade}
-                    on:input={() => validate(i)}
-                />
-                <button on:click={() => subjects.remove(subject)}>Remove</button>
-            </label>
-        </li>
+                    <input
+                        type="number"
+                        min={0}
+                        max={102}
+                        bind:value={subject.grade}
+                        on:input={() => validate(i)}
+                    />
+                    <button on:click={() => subjects.remove(subject)}>Remove</button>
+                </label>
+            </li>
+        {/if}
+    {/each}
+
+    <hr />
+
+    {#each $subjects as subject, i (subject.id)}
+        {#if subject.term === 2}
+            <li transition:slide|global>
+                <label>
+                    <span>{subject.name}</span>
+                    {#if subject.weighted}
+                        <caption>(weighted)</caption>
+                    {/if}
+
+                    <input
+                        type="number"
+                        min={0}
+                        max={102}
+                        bind:value={subject.grade}
+                        on:input={() => validate(i)}
+                    />
+                    <button on:click={() => subjects.remove(subject)}>Remove</button>
+                </label>
+            </li>
+        {/if}
     {/each}
 </ul>
 

@@ -38,6 +38,19 @@ export interface Grades {
     totalPoints: number;
 }
 
+type GradingTask = {
+    taskName: string;
+    progressScore: string;
+    score: string;
+    progressPercent: number;
+    progress: number;
+    progressTotalPoints: number;
+    progressPointsEarned: number;
+    pointsEarned: number;
+    percent: number;
+    totalPoints: number;
+    comments: string;
+};
 export interface Placement {
     startTime: string;
     endTime: string;
@@ -221,8 +234,7 @@ class User extends EventEmitter {
         try {
             const res = await this.fetch(url);
             const text = await res.text();
-            if (!res.ok || text.match(/error/))
-                throw new Error(`${res.status} ${text}`);
+            if (!res.ok || text.match(/error/)) throw new Error(`${res.status} ${text}`);
 
             console.info("INFO: Login successful");
         } catch (err) {
@@ -250,20 +262,12 @@ class User extends EventEmitter {
      */
     async getTerms(schoolID: number = 0): Promise<Term[]> {
         this.checkAuth();
-        // request roster with placements
-        let res = await this.fetch(
-            this.district!.district_baseurl +
-                "resources/portal/roster?_expand=%7BsectionPlacements-%7Bterm%7D%7D",
-        );
-
-        const roster = (await res.json()) as any;
 
         // request grades
-        res = await this.fetch(this.district!.district_baseurl + "resources/portal/grades");
+        const res = await this.fetch(this.district!.district_baseurl + "resources/portal/grades");
         const grades = (await res.json()) as any;
 
         const result: Term[] = []; // object that we return later
-        const crossReference: any = {};
 
         let schoolIndex = 0;
 
@@ -306,7 +310,7 @@ class User extends EventEmitter {
         }
 
         // loop over terms from /grades
-        grades[schoolIndex].terms.forEach((term: any, i: number) => {
+        grades[schoolIndex].terms.forEach((term: any) => {
             const termResult: Term = {
                 name: term.termName,
                 seq: term.termSeq,
@@ -316,95 +320,44 @@ class User extends EventEmitter {
             };
 
             // loop over classes in a term
-            term.courses.forEach((course: any, ii: number) => {
-                // grading task 4 = Final Grade @ Alpharetta Highschool
-                // might be different at other schools
-                const grade = course.gradingTasks[4];
+            term.courses.forEach((course: any) => {
+                const finalGrade = (course.gradingTasks as GradingTask[]).find(
+                    (grade) => grade.taskName === "Final Grade",
+                );
+
+                if (!finalGrade) return;
 
                 const courseResult: Course = {
                     name: course.courseName,
                     courseNumber: course.courseNumber,
                     roomName: course.roomName,
                     teacher: course.teacherDisplay,
-                    // seq: null, // set this to null so we can add placement data later
                     grades: {
-                        score:
-                            grade.progressScore !== undefined ? grade.progressScore : grade.score,
-                        percent:
-                            grade.progressPercent !== undefined
-                                ? grade.progressPercent
-                                : grade.percent,
-                        totalPoints:
-                            grade.progressTotalPoints !== undefined
-                                ? grade.progressTotalPoints
-                                : grade.totalPoints,
-                        pointsEarned:
-                            grade.progressPointsEarned !== undefined
-                                ? grade.progressPointsEarned
-                                : grade.pointsEarned,
+                        score: finalGrade.progressScore || finalGrade.score,
+                        percent: finalGrade.progressPercent || finalGrade.percent,
+                        totalPoints: finalGrade.progressTotalPoints || finalGrade.totalPoints,
+                        pointsEarned: finalGrade.progressPointsEarned || finalGrade.pointsEarned,
                     },
-                    comments: grade.comments,
+                    comments: finalGrade.comments,
                     _id: course._id,
                 };
 
                 // remove grades for courses without grades
                 if (
-                    !(grade.progressScore || grade.score) &&
-                    !(grade.progressPercent || grade.percent) &&
-                    !(grade.progressTotalPoints || grade.totalPoints) &&
-                    !(grade.progressPointsEarned || grade.pointsEarned)
-                )
-                    courseResult.grades = undefined;
+                    !(finalGrade.progressScore || finalGrade.score) &&
+                    !(finalGrade.progressPercent || finalGrade.percent) &&
+                    !(finalGrade.progressTotalPoints || finalGrade.totalPoints) &&
+                    !(finalGrade.progressPointsEarned || finalGrade.pointsEarned)
+                ) {
+                    return;
+                }
 
                 // push class to term array
                 termResult.courses.push(courseResult);
-
-                // setup cross reference with a pointer into the result var
-                // we can cross reference the data from both endpoints by using the class ID later
-                crossReference[course._id] = {
-                    i: i,
-                    ii: ii,
-                };
             });
 
             // push terms to final array
             result.push(termResult);
-        });
-
-        /*
-            At this point we have basic info about terms and a bit data on the classes (name, teacher, grade). 
-            But we don't have any placement data (period, start & end time, sequence data) for courses or for terms.
-            So now we look over the data from the /roster endpoint and use our cross reference object to add the missing data. 
-            We loop over the data (an array of courses) and check the class ID with our cross reference.
-            That gives us a pointer into the result array so we can add the data in. 
-            We add class placement data into courses and check to see if we need to add term data (this is because the term object is included in every course)
-          */
-
-        // loop over classes from /roster
-        roster.forEach((course: any, i: number) => {
-            const placement = course.sectionPlacements[0];
-
-            // find course from cross reference
-            const ref = crossReference[roster[i]._id];
-            if (!ref) return;
-            const target = result[ref.i].courses[ref.ii];
-
-            // add placement data
-            target.placement = {
-                periodName: placement.periodName,
-                periodSeq: placement.periodSequence,
-                startTime: placement.startTime,
-                endTime: placement.endTime,
-            };
-
-            // // if the term doesn't have placement data associated with it
-            // if (result[ref.i].seq == null) {
-            //   console.log('AAA')
-            //   let term = result[ref.i]
-            //   term.seq = placement.term.seq
-            //   term.startDate = placement.term.startDate
-            //   term.endDate = placement.term.endDate
-            // }
         });
 
         return result;
