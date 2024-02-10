@@ -3,14 +3,18 @@
 <script lang="ts">
     import type { SubjectStore } from "$stores/subjects";
     import { slide } from "svelte/transition";
-
-    export let subjects: SubjectStore;
+    import { subjects } from "$stores/subjects"
+    import { derived } from "svelte/store";
 
     // Given a subject, we make sure that its grade is between 0 and 102
     function validate(i: number) {
         if ($subjects[i].grade > 102) $subjects[i].grade = 102;
         if ($subjects[i].grade < 0) $subjects[i].grade = 0;
     }
+
+    const firstSemesterSubjects = derived(subjects, ($subjects) => {
+        return $subjects.filter((subject) => subject.name.match(/(1)/) == 1);
+    });
 </script>
 
 <ul>

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import  {
+    import {
         isWeighted,
         subjects,
         subjectList,
@@ -12,22 +12,26 @@
     import Modal from "$components/Modal.svelte";
     import type District from "$lib/District";
     import { enhance } from "$app/forms";
+    import { v4 as uuid } from "uuid";
 
     export let data;
     export let form;
 
     // if the user imported from infinite campus, use those grades instead
     $: if (form?.success) {
-        form.data.forEach((term) => {
-            let courses = term.courses.map((course, i) => ({
-                name: course.name,
+        let terms = [];
+        form.data.forEach((term, i) => {
+            let courses = term.courses.map((course) => ({
+                name: `${course.name} (${i + 1})`,
                 grade: course.grades?.percent || 0,
-                id: i,
+                id: uuid(),
                 weighted: isWeighted(course.name),
             }));
 
-            subjects.update(() => courses);
+            terms.push(courses);
         });
+
+        subjects.update(() => terms.flat());
     }
 
     function handleKeydown(event: KeyboardEvent) {
@@ -37,18 +41,26 @@
         // if the user didn't enter anything, don't add a new subject
         if (!textBox.value) return;
 
-        subjects.add(textBox.value, 90); // default grade in 90
+        subjects.add(textBox.value, 90); // default grade is 90
         // clear the textbox
         textBox.value = "";
     }
 
-    function getDistrict(name: string): District {
-        return data.districts.filter((d: District) => d.district_name == name)[0];
+    function getDistrict(name: string): District | undefined {
+        // we look trhought the districts and return the first with the same name
+        return data.districts.find((d: District) => d.district_name == name);
+    }
+
+    enum ImportStatus {
+        None,
+        Loading,
+        Error,
+        Done,
     }
 
     let importDialog: HTMLDialogElement;
     let reportDialog: HTMLDialogElement;
-    let importing = false;
+    let importStatus = ImportStatus.None;
     let county = "Fulton County";
 
     function gradeColor(grade: number): string {
@@ -65,6 +77,10 @@
 </script>
 
 <div class="board">
+    <!--- <label>
+        Target GPA:
+        <input type="number" min="0" max="102" />
+    </label> ---!>
     <!-- round GPAs to two decimal places -->
     <h2>
         GPA:
@@ -72,6 +88,7 @@
             {$weightedGPA.toFixed(2)}
         </span>
     </h2>
+
     <h2>
         Unweighted GPA:
         <span style="color: {gradeColor($unweightedGPA)}">
@@ -93,7 +110,7 @@
         {/each}
     </datalist>
 
-    <SubjectList {subjects} />
+    <SubjectList />
 
     <button on:click={() => importDialog.showModal()}>Import grades from Infinite Campus</button>
     <button on:click={() => reportDialog.showModal()}>Show Report</button>
@@ -139,12 +156,17 @@
     <form
         method="post"
         use:enhance={() => {
-            importing = true;
+            importStatus = ImportStatus.Loading;
 
-            return async ({ update }) => {
+            return async ({ result, update }) => {
+                if (result.type == "failure" || result.type == "error") {
+                    importStatus = ImportStatus.Error;
+                } else {
+                    importStatus = ImportStatus.Done;
+                    importDialog.close();
+                }
+
                 await update();
-                importing = false;
-                importDialog.close();
             };
         }}
     >
@@ -157,8 +179,8 @@
             </select>
         </label>
 
-        {#if county}
-            <a href={getDistrict(county).student_login_url}>link</a>
+        {#if getDistrict(county)}
+            <a href={getDistrict(county)?.student_login_url}>link</a>
         {/if}
         <br />
 
@@ -177,8 +199,13 @@
         <input type="submit" value="Import" />
     </form>
 
-    {#if importing}
+    {#if importStatus == ImportStatus.Loading}
         <span>importing...</span>
+    {:else if importStatus == ImportStatus.Error}
+        <span style="color: red;">
+            There was a problem logging in. Please make sure your district, username and password
+            are correct
+        </span>
     {/if}
 </Modal>
 
