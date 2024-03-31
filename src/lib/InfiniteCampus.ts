@@ -19,19 +19,7 @@ const meta: Metadata = {
     github: "dosu0/gpa-calculator",
 };
 
-/*
-  Heres some basic vocab used to keep things consistent throughout naming and comments
-  term: a way of dividing up the school year. This may be by quarters, trimesters, semesters, etc.
-  course: a class
-  placement: the time within a day/term that a course takes place. Ex: 2nd hour at 9:15AM during quarter 1
-  notification count: the number of unseen notifications. This is the number that shows next to the bell icon on the website. The count is reset when you click the bell. NOTE: unseen is different from unread
-  (un)read notification: individual read state of a single notification. NOTE: read state is different from the unseen count
-*/
-
-// class definitions:
-//
-
-export interface Grades {
+export interface Grade {
     percent: number;
     pointsEarned: number;
     score: string;
@@ -87,7 +75,7 @@ export interface Course {
     roomName: string;
     teacher: string;
     _id: string;
-    grades?: Grades;
+    grade: Grade;
     placement?: Placement;
     comments: string;
 }
@@ -326,13 +314,17 @@ class User extends EventEmitter {
                 );
 
                 if (!finalGrade) return;
+                // the score "CR" is used as placeholder for courses (like the "Gifted Participation" class) 
+                // that do not have a grade (at least at my school)
+                // so we early return to filter those out
+                if (finalGrade.score == "CR") return;
 
                 const courseResult: Course = {
                     name: course.courseName,
                     courseNumber: course.courseNumber,
                     roomName: course.roomName,
                     teacher: course.teacherDisplay,
-                    grades: {
+                    grade: {
                         score: finalGrade.progressScore || finalGrade.score,
                         percent: finalGrade.progressPercent || finalGrade.percent,
                         totalPoints: finalGrade.progressTotalPoints || finalGrade.totalPoints,
@@ -344,10 +336,10 @@ class User extends EventEmitter {
 
                 // remove grades for courses without grades
                 if (
-                    !(finalGrade.progressScore || finalGrade.score) &&
-                    !(finalGrade.progressPercent || finalGrade.percent) &&
-                    !(finalGrade.progressTotalPoints || finalGrade.totalPoints) &&
-                    !(finalGrade.progressPointsEarned || finalGrade.pointsEarned)
+                    !courseResult.grade.score &&
+                    !courseResult.grade.percent &&
+                    !courseResult.grade.totalPoints &&
+                    !courseResult.grade.pointsEarned
                 ) {
                     return;
                 }
