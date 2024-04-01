@@ -7,13 +7,19 @@
     <hr />
     <slot />
     <hr />
-    <button on:click={() => dialog.close()}>close</button>
+    <button on:click={() => dialog.close()}>Close</button>
 </dialog>
 
 <style>
     dialog {
         max-width: 40em;
+        border-width: medium;
         border-radius: 0.8em;
+    }
+
+    hr {
+        margin-top: 1.5em;
+        margin-bottom: 1.5em;
     }
 
     /* darken background */

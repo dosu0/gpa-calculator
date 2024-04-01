@@ -84,6 +84,10 @@
         margin: 0 0 1em 0;
     }
 
+    hr {
+        margin-top: 1em;
+        margin-bottom: 1em;
+    }
     caption {
         color: lightgray;
     }
