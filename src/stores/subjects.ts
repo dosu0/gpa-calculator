@@ -1,7 +1,9 @@
 import { browser } from "$app/environment";
 import type { Writable } from "svelte/store";
-import { writable, derived } from "svelte/store";
+import { writable, derived, get } from "svelte/store";
 import { v4 as uuid } from "uuid";
+
+import { settings } from "./settings";
 
 export interface Subject {
     // Each subject is given an id, so that subjects with the same name can be differentiated
@@ -54,7 +56,19 @@ export function createSubjectList(initialSubjects: InitialSubject[]): SubjectSto
         term: 1,
     }));
 
-    const { subscribe, update, set } = writable(subjects);
+    const { subscribe, update, set } = writable<Subject[]>(subjects);
+
+    // The subscribe method on a store allows us to listen for when the subjects are updated
+    subscribe((currentSubjects) => {
+        // First we make sure we are in the browser, and that autosave is enabled
+        // If we are, then convert the user's current subjects to a string
+        // Then we save this to a variable called subjects in the localStorage
+
+        if (browser && get(settings).autosave) {
+            localStorage.setItem("subjects", JSON.stringify(currentSubjects));
+            // TODO: create a dialog that shows that the subjects were autosaved
+        }
+    });
 
     return {
         subscribe,
@@ -93,24 +107,16 @@ function load() {
 }
 
 const defaultSubjects = [
-    { name: "AP Calculus", grade: 98 },
-    { name: "Spanish 3", grade: 98 },
-    { name: "AP Computer Science A", grade: 100 },
-    { name: "10th Lit", grade: 94 },
-    { name: "AP Lang", grade: 80 },
+    { name: "AP Precalculus", grade: 91 },
+    { name: "Spanish 3", grade: 79 },
+    { name: "AP Computer Science A", grade: 92 },
+    { name: "World Lit/Comp", grade: 80 },
+    { name: "Chemistry H", grade: 89 },
 ];
 
 // attempts to load subjects from the browser's local storage
 // if it doesn't exist, then we load an example list of subjects
 export const subjects = createSubjectList(load() || defaultSubjects);
-
-// The subscribe method on a store allows us to listen for when the subjects are updated
-subjects.subscribe((currentSubjects) => {
-    // First we check if we're in the browser
-    // If we are, then convert the user's current subjects to a string
-    // Then we save this to a variable called subjects in the localStorage
-    if (browser) localStorage.setItem("subjects", JSON.stringify(currentSubjects));
-});
 
 // list of subjects for the dropdown menu
 // from: https://www.fultonschools.org/site/handlers/filedownload.ashx?moduleinstanceid=58907&dataid=127455&FileName=Course%20Catalog%20for%20School%20Year%202023-2024.pdf
@@ -228,7 +234,7 @@ export let weightedGPA = derived(subjects, ($subjects) => {
 
     let totalGrade = 0;
 
-    for (let subject of $subjects) {
+    for (const subject of $subjects) {
         // Here we add the grade to the total
         // If it doesn't exist (maybe the user didn't enter anything),
         // Then we replace the grade with 0
@@ -249,7 +255,7 @@ export const unweightedGPA = derived(subjects, ($subjects) => {
     if ($subjects.length === 0) return 0;
 
     let totalGrade = 0;
-    for (let subject of $subjects) {
+    for (const subject of $subjects) {
         totalGrade += subject.grade || 0;
     }
 
@@ -263,11 +269,10 @@ export const lowestGrade = derived(subjects, ($subjects) => {
             name: "None",
         };
     }
-
     let min = $subjects[0].grade;
     let className = $subjects[0].name;
 
-    for (let { name, grade } of $subjects) {
+    for (const { name, grade } of $subjects) {
         if (grade < min) {
             min = grade;
             className = name;
@@ -291,7 +296,7 @@ export const highestGrade = derived(subjects, ($subjects) => {
     let max = $subjects[0].grade;
     let className = $subjects[0].name;
 
-    for (let { name, grade } of $subjects) {
+    for (const { name, grade } of $subjects) {
         if (grade > max) {
             max = grade;
             className = name;

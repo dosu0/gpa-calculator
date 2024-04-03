@@ -5,6 +5,7 @@
             <a href="/">home</a>
             <a href="/about">about</a>
             <a href="/help">help</a>
+            <a href="/settings">settings</a>
         </nav>
 
         <!-- The slot tag is where the rest of the page is inserted -->

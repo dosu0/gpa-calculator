@@ -99,7 +99,7 @@ export interface Term {
 /**
  * Class representing an authenticated Infinite Campus user
  */
-class User extends EventEmitter {
+export default class User extends EventEmitter {
     meta: Metadata;
     authenticated: boolean;
     cookieAgent: CookieAgent;
@@ -254,6 +254,10 @@ class User extends EventEmitter {
         // request grades
         const res = await this.fetch(this.district!.district_baseurl + "resources/portal/grades");
         const grades = (await res.json()) as any;
+        if (!grades) {
+            console.error("ERROR: No grades found");
+            throw new Error("No grades found");
+        }
 
         const result: Term[] = []; // object that we return later
 
@@ -314,7 +318,7 @@ class User extends EventEmitter {
                 );
 
                 if (!finalGrade) return;
-                // the score "CR" is used as placeholder for courses (like the "Gifted Participation" class) 
+                // the score "CR" is used as placeholder for courses (like the "Gifted Participation" class)
                 // that do not have a grade (at least at my school)
                 // so we early return to filter those out
                 if (finalGrade.score == "CR") return;
@@ -369,5 +373,3 @@ class User extends EventEmitter {
         }
     }
 }
-
-export default User;
