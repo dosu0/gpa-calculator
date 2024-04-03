@@ -5,16 +5,16 @@
         subjectList,
         weightedGPA,
         unweightedGPA,
-        lowestGrade,
-        highestGrade,
     } from "$stores/subjects";
     import SubjectList from "$components/SubjectList.svelte";
     import Modal from "$components/Modal.svelte";
+    import GradeReport from "$components/GradeReport.svelte";
+    import type { Subject } from "$stores/subjects";
     import type District from "$lib/District";
 
-    import type { Subject } from "$stores/subjects";
     import { enhance } from "$app/forms";
     import { v4 as uuid } from "uuid";
+    import Grade from "$components/Grade.svelte";
 
     export let data;
     export let form;
@@ -25,7 +25,7 @@
         form.data.forEach((term, i) => {
             let courses = term.courses.map((course) => ({
                 name: course.name,
-                grade: course.grades?.percent || 0,
+                grade: course.grade?.percent || 0,
                 id: uuid(),
                 weighted: isWeighted(course.name),
                 term: i + 1,
@@ -65,19 +65,9 @@
     let reportDialog: HTMLDialogElement;
     let importStatus = ImportStatus.None;
     let county = "Fulton County";
-
-    function gradeColor(grade: number): string {
-        if (grade >= 90) {
-            return "green";
-        } else if (grade >= 80) {
-            return "yellowgreen";
-        } else if (grade >= 70) {
-            return "orange";
-        } else {
-            return "red";
-        }
-    }
 </script>
+
+<GradeReport bind:dialog={reportDialog} />
 
 <div class="board">
     <!--- <label>
@@ -87,16 +77,12 @@
     <!-- round GPAs to two decimal places -->
     <h2>
         GPA:
-        <span style="color: {gradeColor($weightedGPA)}">
-            {$weightedGPA.toFixed(2)}
-        </span>
+        <Grade grade={$weightedGPA} />
     </h2>
 
     <h2>
         Unweighted GPA:
-        <span style="color: {gradeColor($unweightedGPA)}">
-            {$unweightedGPA.toFixed(2)}
-        </span>
+        <Grade grade={$unweightedGPA} />
     </h2>
 
     <input
@@ -115,46 +101,13 @@
 
     <SubjectList />
 
-    <button on:click={() => importDialog.showModal()}>Import grades from Infinite Campus</button>
+    <button on:click={() => importDialog.showModal()}>Import Grades From Infinite Campus</button>
     <button on:click={() => reportDialog.showModal()}>Show Report</button>
     <button on:click={() => subjects.clear()}>Clear</button>
 </div>
 
-<Modal bind:dialog={reportDialog}>
-    <h2 slot="title">Grade Report</h2>
-
-    <p>
-        <b>GPA:</b>
-        <span style="color: {gradeColor($weightedGPA)}">
-            {$weightedGPA.toFixed(2)}
-        </span>
-    </p>
-    <p>
-        <b>Unweighted GPA:</b>
-        <span style="color: {gradeColor($unweightedGPA)}">
-            {$unweightedGPA.toFixed(2)}
-        </span>
-    </p>
-
-    <p>
-        <b>Lowest Grade:</b>
-        <span style="color: {gradeColor($lowestGrade.grade)}">
-            {$lowestGrade.grade.toFixed(2)}
-            ({$lowestGrade.name})
-        </span>
-    </p>
-
-    <p>
-        <b>Highest Grade:</b>
-        <span style="color: {gradeColor($highestGrade.grade)}">
-            {$highestGrade.grade.toFixed(2)}
-            ({$highestGrade.name})
-        </span>
-    </p>
-</Modal>
-
 <Modal bind:dialog={importDialog}>
-    <h2 slot="title">Import grades from Infinite Campus</h2>
+    <h2 slot="title">Import Grades From Infinite Campus</h2>
 
     <form
         method="post"
@@ -174,7 +127,7 @@
         }}
     >
         <label>
-            select a county:
+            Select a County:
             <select name="district" bind:value={county} required>
                 {#each data.districts as district (district.id)}
                     <option>{district.district_name}</option>
@@ -185,6 +138,7 @@
         {#if getDistrict(county)}
             <a href={getDistrict(county)?.student_login_url}>link</a>
         {/if}
+
         <br />
 
         <label>
