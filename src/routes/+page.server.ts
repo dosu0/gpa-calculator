@@ -16,9 +16,6 @@ type Load = {
 };
 
 export async function load(): Promise<Load> {
-    // TODO: log user in
-    // await user.login("Fulton County", "GA", "userid", "password");
-
     return {
         districts: await fetchDistricts(),
     };
