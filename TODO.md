@@ -1,7 +1,6 @@
 - Document libraries used (in the about page?)
 - Add an interactive tutorial
 - Prompt the user for which semesters they want to import
-- Add a settings menu that allows the user to disable auto-save
 - Expand to other states
 - Add a dark theme
 - Switch to shadcn?

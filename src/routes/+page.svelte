@@ -111,6 +111,7 @@
 
     <form
         method="post"
+        action="?/import"
         use:enhance={() => {
             importStatus = ImportStatus.Loading;
 

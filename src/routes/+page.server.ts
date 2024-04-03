@@ -22,7 +22,7 @@ export async function load(): Promise<Load> {
 }
 
 export const actions = {
-    default: async ({ request }) => {
+    import: async ({ request }) => {
         const data = await request.formData();
 
         const district = data.get("district")?.toString();
