@@ -7,14 +7,12 @@
         unweightedGPA,
     } from "$stores/subjects";
     import SubjectList from "$components/SubjectList.svelte";
-    import Modal from "$components/Modal.svelte";
     import GradeReport from "$components/GradeReport.svelte";
     import type { Subject } from "$stores/subjects";
-    import type District from "$lib/District";
 
-    import { enhance } from "$app/forms";
     import { v4 as uuid } from "uuid";
     import Grade from "$components/Grade.svelte";
+    import ImportModal from "$components/ImportModal.svelte";
 
     export let data;
     export let form;
@@ -49,25 +47,12 @@
         textBox.value = "";
     }
 
-    function getDistrict(name: string): District | undefined {
-        // we look trhought the districts and return the first with the same name
-        return data.districts.find((d: District) => d.district_name == name);
-    }
-
-    enum ImportStatus {
-        None,
-        Loading,
-        Error,
-        Done,
-    }
-
     let importDialog: HTMLDialogElement;
     let reportDialog: HTMLDialogElement;
-    let importStatus = ImportStatus.None;
-    let county = "Fulton County";
 </script>
 
 <GradeReport bind:dialog={reportDialog} />
+<ImportModal bind:dialog={importDialog} {data} />
 
 <div class="board">
     <!--- <label>
@@ -105,67 +90,6 @@
     <button on:click={() => reportDialog.showModal()}>Show Report</button>
     <button on:click={() => subjects.clear()}>Clear</button>
 </div>
-
-<Modal bind:dialog={importDialog}>
-    <h2 slot="title">Import Grades From Infinite Campus</h2>
-
-    <form
-        method="post"
-        action="?/import"
-        use:enhance={() => {
-            importStatus = ImportStatus.Loading;
-
-            return async ({ result, update }) => {
-                if (result.type == "failure" || result.type == "error") {
-                    importStatus = ImportStatus.Error;
-                } else {
-                    importStatus = ImportStatus.Done;
-                    importDialog.close();
-                }
-
-                await update();
-            };
-        }}
-    >
-        <label>
-            Select a County:
-            <select name="district" bind:value={county} required>
-                {#each data.districts as district (district.id)}
-                    <option>{district.district_name}</option>
-                {/each}
-            </select>
-        </label>
-
-        {#if getDistrict(county)}
-            <a href={getDistrict(county)?.student_login_url}>link</a>
-        {/if}
-
-        <br />
-
-        <label>
-            Username:
-            <input name="username" type="text" autocomplete="username" required />
-        </label>
-        <br />
-
-        <label>
-            Password:
-            <input name="password" type="password" autocomplete="current-password" required />
-        </label>
-        <br />
-
-        <input type="submit" value="Import" />
-    </form>
-
-    {#if importStatus == ImportStatus.Loading}
-        <span>importing...</span>
-    {:else if importStatus == ImportStatus.Error}
-        <span style="color: red;">
-            There was a problem logging in. Please make sure your district, username and password
-            are correct
-        </span>
-    {/if}
-</Modal>
 
 <style>
     .board {
