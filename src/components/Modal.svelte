@@ -15,6 +15,7 @@
         max-width: 40em;
         border-width: medium;
         border-radius: 0.8em;
+        padding: 2rem;
     }
 
     hr {
