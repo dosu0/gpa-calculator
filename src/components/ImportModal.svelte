@@ -16,7 +16,8 @@
 
     let importStatus = ImportStatus.None;
 
-    let county = "Fulton County";
+    let district = "Fulton County";
+    let state = "GA";
 
     const handleImport: SubmitFunction = () => {
         importStatus = ImportStatus.Loading;
@@ -32,39 +33,41 @@
             await update();
         };
     };
-    $: district = data.districts.find((d: District) => d.district_name == county);
 </script>
 
 <Modal bind:dialog>
     <h2 slot="title">Import Grades From Infinite Campus</h2>
 
     <form method="post" action="?/import" use:enhance={handleImport}>
+        <!-- TODO: add a dropdown to select --->
         <label>
-            Select a County:
-            <select name="district" bind:value={county} required>
+            Select Your State:
+            <select name="state" bind:value={state} required> </select>
+        </label>
+
+        <label>
+            Select Your District:
+            <select name="district" bind:value={district} required>
                 {#each data.districts as district (district.id)}
                     <option>{district.district_name}</option>
                 {/each}
             </select>
         </label>
 
-        {#if district}
-            <a href={district?.student_login_url}>link</a>
-        {/if}
-
-        <br />
-
+        <!-- This isn't really necessary
+            {#if district}
+                <a href={district?.student_login_url}>link</a>
+            {/if} 
+        !-->
         <label>
             Username:
             <input name="username" type="text" autocomplete="username" required />
         </label>
-        <br />
 
         <label>
             Password:
             <input name="password" type="password" autocomplete="current-password" required />
         </label>
-        <br />
 
         <input type="submit" value="Import" />
     </form>
@@ -80,7 +83,7 @@
 </Modal>
 
 <style>
-    form {
+    label {
         display: block;
     }
 
