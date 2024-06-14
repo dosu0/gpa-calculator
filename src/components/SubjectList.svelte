@@ -3,11 +3,14 @@
 <script lang="ts">
     import { slide } from "svelte/transition";
     import { subjects } from "$stores/subjects";
+    import { currentSemester } from "$stores/subjects";
 
     // Given a subject, we make sure that its grade is between 0 and 102
     function validate(i: number) {
-        if ($subjects[i].grade > 102) $subjects[i].grade = 102;
-        if ($subjects[i].grade < 0) $subjects[i].grade = 0;
+        if ($subjects[$currentSemester - 1][i].grade > 102)
+            $subjects[$currentSemester - 1][i].grade = 102;
+        if ($subjects[$currentSemester - 1][i].grade < 0)
+            $subjects[$currentSemester - 1][i].grade = 0;
     }
 </script>
 
@@ -15,8 +18,8 @@
     <!--This is a svelte for loop, 
         we use this to generate HTML for every subject 
     -->
-    {#each $subjects as subject, i (subject.id)}
-        {#if subject.term === 1}
+    {#if $currentSemester != 3}
+        {#each $subjects[$currentSemester - 1] as subject, i (subject.id)}
             <li transition:slide|global>
                 <label>
                     <span>{subject.name}</span>
@@ -34,13 +37,9 @@
                     <button on:click={() => subjects.remove(subject)}>Remove</button>
                 </label>
             </li>
-        {/if}
-    {/each}
-
-    <hr />
-
-    {#each $subjects as subject, i (subject.id)}
-        {#if subject.term === 2}
+        {/each}
+    {:else}
+        {#each $subjects[0] as subject, i (subject.id)}
             <li transition:slide|global>
                 <label>
                     <span>{subject.name}</span>
@@ -58,8 +57,30 @@
                     <button on:click={() => subjects.remove(subject)}>Remove</button>
                 </label>
             </li>
-        {/if}
-    {/each}
+        {/each}
+
+        <hr />
+
+        {#each $subjects[1] as subject, i (subject.id)}
+            <li transition:slide|global>
+                <label>
+                    <span>{subject.name}</span>
+                    {#if subject.weighted}
+                        <caption>(weighted)</caption>
+                    {/if}
+
+                    <input
+                        type="number"
+                        min={0}
+                        max={102}
+                        bind:value={subject.grade}
+                        on:input={() => validate(i)}
+                    />
+                    <button on:click={() => subjects.remove(subject)}>Remove</button>
+                </label>
+            </li>
+        {/each}
+    {/if}
 </ul>
 
 <style>

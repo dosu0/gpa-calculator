@@ -39,11 +39,12 @@
     <h2 slot="title">Import Grades From Infinite Campus</h2>
 
     <form method="post" action="?/import" use:enhance={handleImport}>
-        <!-- TODO: add a dropdown to select --->
+        <!-- TODO: add a dropdown to select 
         <label>
             Select Your State:
             <select name="state" bind:value={state} required> </select>
         </label>
+        --->
 
         <label>
             Select Your District:

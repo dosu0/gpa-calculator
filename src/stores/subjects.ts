@@ -5,6 +5,8 @@ import { v4 as uuid } from "uuid";
 
 import { settings } from "./settings";
 
+export let currentSemester = writable(1);
+
 export interface Subject {
     // Each subject is given an id, so that subjects with the same name can be differentiated
     id: string;
@@ -17,17 +19,19 @@ export interface Subject {
     // The current unweighted grade percent (without +7 points)
     // The 7 honors points are calculated after the fact
     grade: number;
-    // A term can either be a semester (so 1 and 2), or in a quarter system can be (1-4)
-    term: number;
+    // A term can either be a semester (so 1 and 2)
+    semester: number;
 }
 
 export interface InitialSubject {
     name: string;
     grade: number;
+    semester: number;
+    
 }
 
 // This extends the functionality of the writable store provided by svelte so we can use it to add and remove subjects
-export interface SubjectStore extends Writable<Subject[]> {
+export interface SubjectStore extends Writable<Subject[][]> {
     add: (name: string, grade: number) => void;
     remove: (subject: Subject) => void;
     clear: () => void;
@@ -48,15 +52,21 @@ export function isWeighted(name: string): boolean {
     return advancedIndicators.test(name) || name.endsWith(" H") || name.endsWith(" h");
 }
 
-export function createSubjectList(initialSubjects: InitialSubject[]): SubjectStore {
-    const subjects = initialSubjects.map((subject) => ({
-        ...subject,
-        weighted: isWeighted(subject.name),
-        id: uuid(),
-        term: 1,
-    }));
 
-    const { subscribe, update, set } = writable<Subject[]>(subjects);
+
+export function createSubjectList(initialSubjects: InitialSubject[]): SubjectStore {
+    const subjects: Subject[][] = [[],[]];
+    
+    for (const subject of initialSubjects) {
+            subjects[subject.semester - 1].push({
+                ...subject,
+                weighted: isWeighted(subject.name),
+                id: uuid(),
+            });
+       
+    };
+
+    const { subscribe, update, set } = writable<Subject[][]>(subjects);
 
     // The subscribe method on a store allows us to listen for when the subjects are updated
     subscribe((currentSubjects) => {
@@ -74,15 +84,20 @@ export function createSubjectList(initialSubjects: InitialSubject[]): SubjectSto
         subscribe,
         set,
         update,
-        add: (name: string, grade: number = 90, term: number = 1) => {
+        add: (name: string, grade: number = 90, semester: number = 1) => {
             const subject = {
                 id: uuid(),
                 name,
                 grade,
                 weighted: isWeighted(name),
-                term,
+                semester,
             };
-            update(($subjects) => [...$subjects, subject]);
+            update(($subjects) => {
+                if (semester == 1) {
+                return [[...$subjects[0], subject], $subjects[1]];
+            } else {
+                return [$subjects[0], [...$subjects[1], subject]];
+            }});
         },
         remove: (subject: Subject) => {
             update(($subjects) => $subjects.filter((s) => s !== subject));
@@ -107,16 +122,22 @@ function load() {
 }
 
 const defaultSubjects = [
-    { name: "AP Precalculus", grade: 91 },
-    { name: "Spanish 3", grade: 79 },
-    { name: "AP Computer Science A", grade: 92 },
-    { name: "World Lit/Comp", grade: 80 },
-    { name: "Chemistry H", grade: 89 },
+    { name: "AP Precalculus", grade: 91, semester: 1 },
+    { name: "Spanish 3", grade: 79,  semester: 1  },
+    { name: "AP Computer Science A", grade: 92,  semester: 1  },
+    { name: "World Lit/Comp", grade: 80,  semester: 1  },
+    { name: "Chemistry H", grade: 89,  semester: 1  },
+
+    { name: "AP Precalculus", grade: 80, semester: 2 },
+    { name: "Spanish 3", grade: 54,  semester: 2  },
+    { name: "AP Computer Science A", grade: 88,  semester: 2  },
+    { name: "World Lit/Comp", grade: 83,  semester: 2  },
+    { name: "Chemistry H", grade: 75,  semester: 2  },
 ];
 
 // attempts to load subjects from the browser's local storage
 // if it doesn't exist, then we load an example list of subjects
-export const subjects = createSubjectList(load() || defaultSubjects);
+export const subjects = createSubjectList(/* load() || */ defaultSubjects);
 
 // list of subjects for the dropdown menu
 // from: https://www.fultonschools.org/site/handlers/filedownload.ashx?moduleinstanceid=58907&dataid=127455&FileName=Course%20Catalog%20for%20School%20Year%202023-2024.pdf
@@ -228,13 +249,18 @@ export const subjectList = [
 
 // This creates a derived store, so that whenever the list of subjects changes,
 // The gpa is recalculated
-export let weightedGPA = derived(subjects, ($subjects) => {
+export let weightedGPA =  derived([currentSemester, subjects], ([$currentSemester,  $subjects]) => {
+    let currentSubjects;
+     if ($currentSemester == 3)
+        currentSubjects = [...$subjects[0], ...$subjects[1]];
+    else
+        currentSubjects = $subjects[$currentSemester - 1];
     // If there are no subjects, we early return with 0
-    if ($subjects.length === 0) return 0;
+    if (currentSubjects.length === 0) return 0;
 
     let totalGrade = 0;
 
-    for (const subject of $subjects) {
+    for (const subject of currentSubjects) {
         // Here we add the grade to the total
         // If it doesn't exist (maybe the user didn't enter anything),
         // Then we replace the grade with 0
@@ -248,31 +274,41 @@ export let weightedGPA = derived(subjects, ($subjects) => {
     }
 
     // Then we return the average by dividing the total by the length
-    return totalGrade / $subjects.length;
+    return totalGrade / currentSubjects.length;
 });
 
-export const unweightedGPA = derived(subjects, ($subjects) => {
-    if ($subjects.length === 0) return 0;
+export const unweightedGPA = derived([currentSemester, subjects], ([$currentSemester,  $subjects]) => {
+    let currentSubjects;
+    if ($currentSemester == 3)
+       currentSubjects = [...$subjects[0], ...$subjects[1]];
+   else
+       currentSubjects = $subjects[$currentSemester - 1];
+    if (currentSubjects.length === 0) return 0;
 
     let totalGrade = 0;
-    for (const subject of $subjects) {
+    for (const subject of currentSubjects) {
         totalGrade += subject.grade || 0;
     }
 
-    return totalGrade / $subjects.length;
+    return totalGrade / currentSubjects.length;
 });
 
-export const lowestGrade = derived(subjects, ($subjects) => {
+export const lowestGrade = derived([currentSemester, subjects], ([$currentSemester,  $subjects]) => {
+    let currentSubjects;
+    if ($currentSemester == 3)
+       currentSubjects = [...$subjects[0], ...$subjects[1]];
+   else
+       currentSubjects = $subjects[$currentSemester - 1];
     if ($subjects.length === 0) {
         return {
             grade: 0,
             name: "None",
         };
     }
-    let min = $subjects[0].grade;
-    let className = $subjects[0].name;
+    let min = currentSubjects[0].grade;
+    let className = currentSubjects[0].name;
 
-    for (const { name, grade } of $subjects) {
+    for (const { name, grade } of currentSubjects) {
         if (grade < min) {
             min = grade;
             className = name;
@@ -285,18 +321,23 @@ export const lowestGrade = derived(subjects, ($subjects) => {
     };
 });
 
-export const highestGrade = derived(subjects, ($subjects) => {
-    if ($subjects.length === 0) {
+export const highestGrade =  derived([currentSemester, subjects], ([$currentSemester,  $subjects]) => {
+    let currentSubjects;
+    if ($currentSemester == 3)
+       currentSubjects = [...$subjects[0], ...$subjects[1]];
+   else
+       currentSubjects = $subjects[$currentSemester - 1];
+    if (currentSubjects.length === 0) {
         return {
             grade: 0,
             name: "None",
         };
     }
 
-    let max = $subjects[0].grade;
-    let className = $subjects[0].name;
+    let max = currentSubjects[0].grade;
+    let className = currentSubjects[0].name;
 
-    for (const { name, grade } of $subjects) {
+    for (const { name, grade } of currentSubjects) {
         if (grade > max) {
             max = grade;
             className = name;

@@ -9,6 +9,7 @@
     import SubjectList from "$components/SubjectList.svelte";
     import GradeReport from "$components/GradeReport.svelte";
     import type { Subject } from "$stores/subjects";
+    import { currentSemester } from "$stores/subjects";
 
     import { v4 as uuid } from "uuid";
     import Grade from "$components/Grade.svelte";
@@ -18,7 +19,7 @@
     export let form;
 
     // if the user imported from infinite campus, use those grades instead
-    $: if (form?.success) {
+    /* $: if (form?.success) {
         let terms: Subject[][] = [];
         form.data.forEach((term, i) => {
             let courses = term.courses.map((course) => ({
@@ -33,7 +34,7 @@
         });
 
         subjects.update(() => terms.flat());
-    }
+    } */
 
     function handleKeydown(event: KeyboardEvent) {
         // only add a new subject if the user presses the "Enter" key
@@ -42,7 +43,7 @@
         // if the user didn't enter anything, don't add a new subject
         if (!textBox.value) return;
 
-        subjects.add(textBox.value, 90); // default grade is 90
+        subjects.add(textBox.value, 90, $currentSemester); // default grade is 90
         // clear the textbox
         textBox.value = "";
     }
@@ -84,6 +85,13 @@
         {/each}
     </datalist>
 
+    <div class="semester-buttons">
+        <button on:click={() => currentSemester.set(1)}>semester 1</button> 
+        <button on:click={() => currentSemester.set(2)}>semester 2</button>
+        <button on:click={() => currentSemester.set(3)}>final gpa</button>
+    </div>
+
+
     <SubjectList />
 
     <button on:click={() => importDialog.showModal()}>Import Grades From Infinite Campus</button>
@@ -99,6 +107,11 @@
         margin: 0 auto;
     }
 
+    .semester-buttons {
+        display: flex;
+        justify-content: center;
+
+    }
     .board > input {
         font-size: 1.4em;
         padding: 0.5em;
@@ -107,6 +120,12 @@
     }
 
     .board > button {
+        padding: 0.5em;
+        margin: 0 0 0.5rem 0;
+        margin-left: 3rem;
+    }
+
+    .semester-buttons > button {
         padding: 0.5em;
         margin: 0 0 0.5rem 0;
         margin-left: 3rem;
