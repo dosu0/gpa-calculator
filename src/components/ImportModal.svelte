@@ -2,6 +2,7 @@
     import Modal from "./Modal.svelte";
     import { enhance } from "$app/forms";
     import type District from "$lib/District";
+    import type { SubmitFunction } from "@sveltejs/kit";
 
     export let dialog: HTMLDialogElement;
     export let data: { districts: District[] };
@@ -17,30 +18,27 @@
 
     let county = "Fulton County";
 
+    const handleImport: SubmitFunction = () => {
+        importStatus = ImportStatus.Loading;
+
+        return async ({ result, update }) => {
+            if (result.type == "failure" || result.type == "error") {
+                importStatus = ImportStatus.Error;
+            } else {
+                importStatus = ImportStatus.Done;
+                dialog.close();
+            }
+
+            await update();
+        };
+    };
     $: district = data.districts.find((d: District) => d.district_name == county);
 </script>
 
 <Modal bind:dialog>
     <h2 slot="title">Import Grades From Infinite Campus</h2>
 
-    <form
-        method="post"
-        action="?/import"
-        use:enhance={() => {
-            importStatus = ImportStatus.Loading;
-
-            return async ({ result, update }) => {
-                if (result.type == "failure" || result.type == "error") {
-                    importStatus = ImportStatus.Error;
-                } else {
-                    importStatus = ImportStatus.Done;
-                    dialog.close();
-                }
-
-                await update();
-            };
-        }}
-    >
+    <form method="post" action="?/import" use:enhance={handleImport}>
         <label>
             Select a County:
             <select name="district" bind:value={county} required>
