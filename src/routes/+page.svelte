@@ -106,17 +106,9 @@
         width: 100%;
     }
 
-    span {
-        color: green;
-    }
-
     .board > button {
         padding: 0.5em;
         margin: 0 0 0.5rem 0;
         margin-left: 3rem;
-    }
-
-    form {
-        display: block;
     }
 </style>
