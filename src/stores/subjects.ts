@@ -27,13 +27,12 @@ export interface InitialSubject {
     name: string;
     grade: number;
     semester: number;
-    
 }
 
 // This extends the functionality of the writable store provided by svelte so we can use it to add and remove subjects
 export interface SubjectStore extends Writable<Subject[][]> {
-    add: (name: string, grade: number) => void;
-    remove: (subject: Subject) => void;
+    add: (name: string, grade: number, semester: number) => void;
+    remove: (subjectId: string) => void;
     clear: () => void;
 }
 
@@ -52,19 +51,16 @@ export function isWeighted(name: string): boolean {
     return advancedIndicators.test(name) || name.endsWith(" H") || name.endsWith(" h");
 }
 
-
-
 export function createSubjectList(initialSubjects: InitialSubject[]): SubjectStore {
-    const subjects: Subject[][] = [[],[]];
-    
-    for (const subject of initialSubjects) {
-            subjects[subject.semester - 1].push({
-                ...subject,
-                weighted: isWeighted(subject.name),
-                id: uuid(),
-            });
-       
-    };
+    const subjects: Subject[][] = [[], []];
+
+    initialSubjects.forEach((subject) => {
+        subjects[subject.semester - 1].push({
+            ...subject,
+            weighted: isWeighted(subject.name),
+            id: uuid(),
+        });
+    });
 
     const { subscribe, update, set } = writable<Subject[][]>(subjects);
 
@@ -94,16 +90,25 @@ export function createSubjectList(initialSubjects: InitialSubject[]): SubjectSto
             };
             update(($subjects) => {
                 if (semester == 1) {
-                return [[...$subjects[0], subject], $subjects[1]];
-            } else {
-                return [$subjects[0], [...$subjects[1], subject]];
-            }});
+                    return [[...$subjects[0], subject], $subjects[1]];
+                } else {
+                    return [$subjects[0], [...$subjects[1], subject]];
+                }
+            });
         },
-        remove: (subject: Subject) => {
-            update(($subjects) => $subjects.filter((s) => s !== subject));
+        remove: (subjectId: string) => {
+            update(($subjects) =>
+                $subjects.map((subjects) => subjects.filter((subject) => subject.id !== subjectId)),
+            );
         },
         clear: () => {
-            update(() => []);
+            if (get(currentSemester) == 3) {
+                update(($s) => [[], []]);
+            } else if (get(currentSemester) == 2) {
+                update(($s) => [$s[0], []]);
+            } else {
+                update(($s) => [[], $s[1]]);
+            }
         },
     };
 }
@@ -123,16 +128,16 @@ function load() {
 
 const defaultSubjects = [
     { name: "AP Precalculus", grade: 91, semester: 1 },
-    { name: "Spanish 3", grade: 79,  semester: 1  },
-    { name: "AP Computer Science A", grade: 92,  semester: 1  },
-    { name: "World Lit/Comp", grade: 80,  semester: 1  },
-    { name: "Chemistry H", grade: 89,  semester: 1  },
+    { name: "Spanish 3", grade: 79, semester: 1 },
+    { name: "AP Computer Science A", grade: 92, semester: 1 },
+    { name: "World Lit/Comp", grade: 80, semester: 1 },
+    { name: "Chemistry H", grade: 89, semester: 1 },
 
     { name: "AP Precalculus", grade: 80, semester: 2 },
-    { name: "Spanish 3", grade: 54,  semester: 2  },
-    { name: "AP Computer Science A", grade: 88,  semester: 2  },
-    { name: "World Lit/Comp", grade: 83,  semester: 2  },
-    { name: "Chemistry H", grade: 75,  semester: 2  },
+    { name: "Spanish 3", grade: 54, semester: 2 },
+    { name: "AP Computer Science A", grade: 88, semester: 2 },
+    { name: "World Lit/Comp", grade: 83, semester: 2 },
+    { name: "Chemistry H", grade: 75, semester: 2 },
 ];
 
 // attempts to load subjects from the browser's local storage
@@ -249,12 +254,10 @@ export const subjectList = [
 
 // This creates a derived store, so that whenever the list of subjects changes,
 // The gpa is recalculated
-export let weightedGPA =  derived([currentSemester, subjects], ([$currentSemester,  $subjects]) => {
+export let weightedGPA = derived([currentSemester, subjects], ([$currentSemester, $subjects]) => {
     let currentSubjects;
-     if ($currentSemester == 3)
-        currentSubjects = [...$subjects[0], ...$subjects[1]];
-    else
-        currentSubjects = $subjects[$currentSemester - 1];
+    if ($currentSemester == 3) currentSubjects = [...$subjects[0], ...$subjects[1]];
+    else currentSubjects = $subjects[$currentSemester - 1];
     // If there are no subjects, we early return with 0
     if (currentSubjects.length === 0) return 0;
 
@@ -277,28 +280,27 @@ export let weightedGPA =  derived([currentSemester, subjects], ([$currentSemeste
     return totalGrade / currentSubjects.length;
 });
 
-export const unweightedGPA = derived([currentSemester, subjects], ([$currentSemester,  $subjects]) => {
+export const unweightedGPA = derived(
+    [currentSemester, subjects],
+    ([$currentSemester, $subjects]) => {
+        let currentSubjects;
+        if ($currentSemester == 3) currentSubjects = [...$subjects[0], ...$subjects[1]];
+        else currentSubjects = $subjects[$currentSemester - 1];
+        if (currentSubjects.length === 0) return 0;
+
+        let totalGrade = 0;
+        for (const subject of currentSubjects) {
+            totalGrade += subject.grade || 0;
+        }
+
+        return totalGrade / currentSubjects.length;
+    },
+);
+
+export const lowestGrade = derived([currentSemester, subjects], ([$currentSemester, $subjects]) => {
     let currentSubjects;
-    if ($currentSemester == 3)
-       currentSubjects = [...$subjects[0], ...$subjects[1]];
-   else
-       currentSubjects = $subjects[$currentSemester - 1];
-    if (currentSubjects.length === 0) return 0;
-
-    let totalGrade = 0;
-    for (const subject of currentSubjects) {
-        totalGrade += subject.grade || 0;
-    }
-
-    return totalGrade / currentSubjects.length;
-});
-
-export const lowestGrade = derived([currentSemester, subjects], ([$currentSemester,  $subjects]) => {
-    let currentSubjects;
-    if ($currentSemester == 3)
-       currentSubjects = [...$subjects[0], ...$subjects[1]];
-   else
-       currentSubjects = $subjects[$currentSemester - 1];
+    if ($currentSemester == 3) currentSubjects = [...$subjects[0], ...$subjects[1]];
+    else currentSubjects = $subjects[$currentSemester - 1];
     if ($subjects.length === 0) {
         return {
             grade: 0,
@@ -321,31 +323,32 @@ export const lowestGrade = derived([currentSemester, subjects], ([$currentSemest
     };
 });
 
-export const highestGrade =  derived([currentSemester, subjects], ([$currentSemester,  $subjects]) => {
-    let currentSubjects;
-    if ($currentSemester == 3)
-       currentSubjects = [...$subjects[0], ...$subjects[1]];
-   else
-       currentSubjects = $subjects[$currentSemester - 1];
-    if (currentSubjects.length === 0) {
-        return {
-            grade: 0,
-            name: "None",
-        };
-    }
-
-    let max = currentSubjects[0].grade;
-    let className = currentSubjects[0].name;
-
-    for (const { name, grade } of currentSubjects) {
-        if (grade > max) {
-            max = grade;
-            className = name;
+export const highestGrade = derived(
+    [currentSemester, subjects],
+    ([$currentSemester, $subjects]) => {
+        let currentSubjects;
+        if ($currentSemester == 3) currentSubjects = [...$subjects[0], ...$subjects[1]];
+        else currentSubjects = $subjects[$currentSemester - 1];
+        if (currentSubjects.length === 0) {
+            return {
+                grade: 0,
+                name: "None",
+            };
         }
-    }
 
-    return {
-        grade: max || 102,
-        name: className,
-    };
-});
+        let max = currentSubjects[0].grade;
+        let className = currentSubjects[0].name;
+
+        for (const { name, grade } of currentSubjects) {
+            if (grade > max) {
+                max = grade;
+                className = name;
+            }
+        }
+
+        return {
+            grade: max || 102,
+            name: className,
+        };
+    },
+);

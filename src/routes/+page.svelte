@@ -19,22 +19,23 @@
     export let form;
 
     // if the user imported from infinite campus, use those grades instead
-    /* $: if (form?.success) {
+    $: if (form?.success) {
         let terms: Subject[][] = [];
+
         form.data.forEach((term, i) => {
             let courses = term.courses.map((course) => ({
                 name: course.name,
                 grade: course.grade?.percent || 0,
                 id: uuid(),
                 weighted: isWeighted(course.name),
-                term: i + 1,
+                semester: i + 1,
             }));
 
             terms.push(courses);
         });
 
-        subjects.update(() => terms.flat());
-    } */
+        subjects.update(() => terms);
+    }
 
     function handleKeydown(event: KeyboardEvent) {
         // only add a new subject if the user presses the "Enter" key
@@ -86,11 +87,19 @@
     </datalist>
 
     <div class="semester-buttons">
-        <button on:click={() => currentSemester.set(1)}>semester 1</button> 
-        <button on:click={() => currentSemester.set(2)}>semester 2</button>
-        <button on:click={() => currentSemester.set(3)}>final gpa</button>
+        <button
+            on:click={() => currentSemester.set(1)}
+            class={$currentSemester == 1 ? "active" : ""}>Semester 1</button
+        >
+        <button
+            on:click={() => currentSemester.set(2)}
+            class={$currentSemester === 2 ? "active" : ""}>Semester 2</button
+        >
+        <button
+            on:click={() => currentSemester.set(3)}
+            class={$currentSemester === 3 ? "active" : ""}>Final GPA</button
+        >
     </div>
-
 
     <SubjectList />
 
@@ -110,7 +119,6 @@
     .semester-buttons {
         display: flex;
         justify-content: center;
-
     }
     .board > input {
         font-size: 1.4em;
@@ -122,12 +130,22 @@
     .board > button {
         padding: 0.5em;
         margin: 0 0 0.5rem 0;
-        margin-left: 3rem;
+        margin-left: 2.5rem;
+    }
+
+    .active {
+        background-color: #aaa;
+    }
+
+    .semester-buttons {
+        margin-left: 2.5rem;
+        margin-bottom: 1rem;
     }
 
     .semester-buttons > button {
         padding: 0.5em;
         margin: 0 0 0.5rem 0;
-        margin-left: 3rem;
+        margin: 0 0 0 0;
+        width: 100%;
     }
 </style>

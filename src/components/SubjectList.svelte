@@ -34,7 +34,7 @@
                         bind:value={subject.grade}
                         on:input={() => validate(i)}
                     />
-                    <button on:click={() => subjects.remove(subject)}>Remove</button>
+                    <button on:click={() => subjects.remove(subject.id)}>Remove</button>
                 </label>
             </li>
         {/each}
@@ -54,7 +54,7 @@
                         bind:value={subject.grade}
                         on:input={() => validate(i)}
                     />
-                    <button on:click={() => subjects.remove(subject)}>Remove</button>
+                    <button on:click={() => subjects.remove(subject.id)}>Remove</button>
                 </label>
             </li>
         {/each}
@@ -76,7 +76,7 @@
                         bind:value={subject.grade}
                         on:input={() => validate(i)}
                     />
-                    <button on:click={() => subjects.remove(subject)}>Remove</button>
+                    <button on:click={() => subjects.remove(subject.id)}>Remove</button>
                 </label>
             </li>
         {/each}
