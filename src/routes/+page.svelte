@@ -87,18 +87,20 @@
     </datalist>
 
     <div class="semester-buttons">
-        <button
-            on:click={() => currentSemester.set(1)}
-            class={$currentSemester == 1 ? "active" : ""}>Semester 1</button
-        >
-        <button
-            on:click={() => currentSemester.set(2)}
-            class={$currentSemester === 2 ? "active" : ""}>Semester 2</button
-        >
-        <button
-            on:click={() => currentSemester.set(3)}
-            class={$currentSemester === 3 ? "active" : ""}>Final GPA</button
-        >
+        <button on:click={() => currentSemester.set(1)} 
+                class:active={$currentSemester === 1}>
+            Semester 1
+        </button>
+
+        <button on:click={() => currentSemester.set(2)} 
+                class:active={$currentSemester === 2}>
+            Semester 2
+        </button>
+
+        <button on:click={() => currentSemester.set(3)} 
+                class:active={$currentSemester === 3}>
+            Semesters 1 & 2
+        </button>
     </div>
 
     <SubjectList />
@@ -134,7 +136,7 @@
     }
 
     .active {
-        background-color: #aaa;
+        background-color: #bbb;
     }
 
     .semester-buttons {

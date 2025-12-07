@@ -3,6 +3,7 @@
     import { enhance } from "$app/forms";
     import type District from "$lib/District";
     import type { SubmitFunction } from "@sveltejs/kit";
+    import { states } from "$lib/utils";
 
     export let dialog: HTMLDialogElement;
     export let data: { districts: District[] };
@@ -39,12 +40,14 @@
     <h2 slot="title">Import Grades From Infinite Campus</h2>
 
     <form method="post" action="?/import" use:enhance={handleImport}>
-        <!-- TODO: add a dropdown to select 
         <label>
             Select Your State:
-            <select name="state" bind:value={state} required> </select>
+            <select name="state" bind:value={state} required>
+                {#each states as state}
+                    <option>{state}</option>
+                {/each}
+            </select>
         </label>
-        --->
 
         <label>
             Select Your District:

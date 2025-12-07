@@ -6,6 +6,7 @@ import { v4 as uuid } from "uuid";
 import { settings } from "./settings";
 
 export let currentSemester = writable(1);
+const BOTH_SEMESTERS = 3;
 
 export interface Subject {
     // Each subject is given an id, so that subjects with the same name can be differentiated
@@ -19,7 +20,7 @@ export interface Subject {
     // The current unweighted grade percent (without +7 points)
     // The 7 honors points are calculated after the fact
     grade: number;
-    // A term can either be a semester (so 1 and 2)
+    // The semester the subject belongs to (so 1 and 2)
     semester: number;
 }
 
@@ -102,8 +103,8 @@ export function createSubjectList(initialSubjects: InitialSubject[]): SubjectSto
             );
         },
         clear: () => {
-            if (get(currentSemester) == 3) {
-                update(($s) => [[], []]);
+            if (get(currentSemester) == BOTH_SEMESTERS) {
+                update((_) => [[], []]);
             } else if (get(currentSemester) == 2) {
                 update(($s) => [$s[0], []]);
             } else {
@@ -256,7 +257,7 @@ export const subjectList = [
 // The gpa is recalculated
 export let weightedGPA = derived([currentSemester, subjects], ([$currentSemester, $subjects]) => {
     let currentSubjects;
-    if ($currentSemester == 3) currentSubjects = [...$subjects[0], ...$subjects[1]];
+    if ($currentSemester == BOTH_SEMESTERS) currentSubjects = [...$subjects[0], ...$subjects[1]];
     else currentSubjects = $subjects[$currentSemester - 1];
     // If there are no subjects, we early return with 0
     if (currentSubjects.length === 0) return 0;
@@ -284,7 +285,7 @@ export const unweightedGPA = derived(
     [currentSemester, subjects],
     ([$currentSemester, $subjects]) => {
         let currentSubjects;
-        if ($currentSemester == 3) currentSubjects = [...$subjects[0], ...$subjects[1]];
+        if ($currentSemester == BOTH_SEMESTERS) currentSubjects = [...$subjects[0], ...$subjects[1]];
         else currentSubjects = $subjects[$currentSemester - 1];
         if (currentSubjects.length === 0) return 0;
 
@@ -301,7 +302,7 @@ export const lowestGrade = derived([currentSemester, subjects], ([$currentSemest
     let currentSubjects;
     if ($currentSemester == 3) currentSubjects = [...$subjects[0], ...$subjects[1]];
     else currentSubjects = $subjects[$currentSemester - 1];
-    if ($subjects.length === 0) {
+    if (currentSubjects.length === 0) {
         return {
             grade: 0,
             name: "None",
